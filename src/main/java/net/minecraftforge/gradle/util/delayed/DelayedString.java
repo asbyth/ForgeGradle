@@ -21,21 +21,17 @@ package net.minecraftforge.gradle.util.delayed;
 
 
 @SuppressWarnings("serial")
-public class DelayedString extends DelayedBase<String>
-{
-    public DelayedString(Class<?> owner, ReplacementProvider provider,  String pattern)
-    {
+public class DelayedString extends DelayedBase<String> {
+    public DelayedString(Class<?> owner, ReplacementProvider provider, String pattern) {
         super(owner, provider, pattern);
     }
-    
-    public DelayedString(Class<?> owner, TokenReplacer replacer)
-    {
+
+    public DelayedString(Class<?> owner, TokenReplacer replacer) {
         super(owner, replacer);
     }
 
     @Override
-    public String resolveDelayed(String replaced)
-    {
+    public String resolveDelayed(String replaced) {
         return replaced;
     }
 }

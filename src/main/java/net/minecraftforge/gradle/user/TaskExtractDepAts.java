@@ -19,17 +19,11 @@
  */
 package net.minecraftforge.gradle.user;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.List;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
-import java.util.jar.Manifest;
-
+import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
+import com.google.common.io.ByteStreams;
+import com.google.common.io.Files;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.file.FileCollection;
@@ -37,57 +31,50 @@ import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.TaskAction;
 
-import com.google.common.base.Splitter;
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
-import com.google.common.io.ByteStreams;
-import com.google.common.io.Files;
+import java.io.*;
+import java.util.List;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 
-public class TaskExtractDepAts extends DefaultTask
-{
+public class TaskExtractDepAts extends DefaultTask {
     @Input
-    private List<String> configurations = Lists.newArrayList();
+    private final List<String> configurations = Lists.newArrayList();
     @OutputDirectory
-    private Object               outputDir;
+    private Object outputDir;
 
     @TaskAction
-    public void doTask() throws IOException
-    {
+    public void doTask() throws IOException {
         FileCollection col = getCollections();
         File outputDir = getOutputDir();
         outputDir.mkdirs(); // make sur eit exists
-        
+
         // make a list of things to delete...
         List<File> toDelete = Lists.newArrayList(outputDir.listFiles(new FileFilter() {
             @Override
-            public boolean accept(File f)
-            {
+            public boolean accept(File f) {
                 return f.isFile();
             }
         }));
 
         Splitter splitter = Splitter.on(' ');
 
-        for (File f : col)
-        {
+        for (File f : col) {
             if (!f.exists() || !f.getName().endsWith("jar"))
                 continue;
 
             JarFile jar = new JarFile(f);
             Manifest man = jar.getManifest();
 
-            if (man != null)
-            {
+            if (man != null) {
                 String atString = man.getMainAttributes().getValue("FMLAT");
-                if (!Strings.isNullOrEmpty(atString))
-                {
-                    for (String at : splitter.split(atString.trim()))
-                    {
+                if (!Strings.isNullOrEmpty(atString)) {
+                    for (String at : splitter.split(atString.trim())) {
                         // append _at.cfg just in case its not there already...
                         // also differentiate the file name, in cas the same At comes from multiple jars.. who knows why...
                         File outFile = new File(outputDir, at + "_" + Files.getNameWithoutExtension(f.getName()) + "_at.cfg");
                         toDelete.remove(outFile);
-                        
+
                         JarEntry entry = jar.getJarEntry("META-INF/" + at);
 
                         InputStream istream = jar.getInputStream(entry);
@@ -102,34 +89,29 @@ public class TaskExtractDepAts extends DefaultTask
 
             jar.close();
         }
-        
+
         // remove the files that shouldnt be there...
-        for (File f : toDelete)
-        {
+        for (File f : toDelete) {
             f.delete();
         }
     }
 
-    public FileCollection getCollections()
-    {
-    	List<Configuration> configs = Lists.newArrayListWithCapacity(configurations.size());
-    	for (String s : configurations)
-    		configs.add(getProject().getConfigurations().getByName(s));
+    public FileCollection getCollections() {
+        List<Configuration> configs = Lists.newArrayListWithCapacity(configurations.size());
+        for (String s : configurations)
+            configs.add(getProject().getConfigurations().getByName(s));
         return getProject().files(configs);
     }
 
-    public void addCollection(String col)
-    {
+    public void addCollection(String col) {
         configurations.add(col);
     }
 
-    public File getOutputDir()
-    {
+    public File getOutputDir() {
         return getProject().file(outputDir);
     }
 
-    public void setOutputDir(Object outputFile)
-    {
+    public void setOutputDir(Object outputFile) {
         this.outputDir = outputFile;
     }
 }

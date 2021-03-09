@@ -23,12 +23,7 @@ import com.google.common.collect.ImmutableList;
 import net.minecraftforge.srg2source.util.io.InputSupplier;
 import net.minecraftforge.srg2source.util.io.OutputSupplier;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;

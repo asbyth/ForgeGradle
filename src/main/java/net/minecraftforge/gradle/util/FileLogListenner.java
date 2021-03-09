@@ -28,26 +28,23 @@ import org.gradle.api.logging.StandardOutputListener;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
 public class FileLogListenner implements StandardOutputListener, BuildListener {
-    private final File out;
     private BufferedWriter writer;
 
     public FileLogListenner(File file) {
-        out = file;
 
         try {
-            if (out.exists())
-                out.delete();
+            if (file.exists())
+                file.delete();
             else
-                out.getParentFile().mkdirs();
+                file.getParentFile().mkdirs();
 
-            out.createNewFile();
+            file.createNewFile();
 
-            writer = Files.newWriter(out, Charset.defaultCharset());
+            writer = Files.newWriter(file, Charset.defaultCharset());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -55,10 +52,6 @@ public class FileLogListenner implements StandardOutputListener, BuildListener {
 
     @Override
     public void projectsLoaded(Gradle arg0) {
-    }
-
-    @Override
-    public void buildStarted(Gradle arg0) {
     }
 
     @Override
@@ -82,6 +75,15 @@ public class FileLogListenner implements StandardOutputListener, BuildListener {
     @Override
     public void projectsEvaluated(Gradle arg0) {
     }  // nothing
+
+    @SuppressWarnings("DEPRECATED") // can't fix this
+    @Override
+    public void buildStarted(Gradle gradle) { }
+
+    @Override
+    public void beforeSettings(Settings settings) {
+
+    }
 
     @Override
     public void settingsEvaluated(Settings arg0) {

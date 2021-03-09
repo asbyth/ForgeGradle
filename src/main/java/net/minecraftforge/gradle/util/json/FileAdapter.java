@@ -19,21 +19,18 @@
  */
 package net.minecraftforge.gradle.util.json;
 
-import java.io.File;
-import java.io.IOException;
-
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
-public class FileAdapter extends TypeAdapter<File>
-{
+import java.io.File;
+import java.io.IOException;
+
+public class FileAdapter extends TypeAdapter<File> {
 
     @Override
-    public File read(JsonReader json) throws IOException
-    {
-        if (json.hasNext())
-        {
+    public File read(JsonReader json) throws IOException {
+        if (json.hasNext()) {
             String value = json.nextString();
             return value == null ? null : new File(value);
         }
@@ -41,14 +38,10 @@ public class FileAdapter extends TypeAdapter<File>
     }
 
     @Override
-    public void write(JsonWriter json, File value) throws IOException
-    {
-        if (value == null)
-        {
+    public void write(JsonWriter json, File value) throws IOException {
+        if (value == null) {
             json.nullValue();
-        }
-        else
-        {
+        } else {
             json.value(value.getCanonicalPath());
         }
     }

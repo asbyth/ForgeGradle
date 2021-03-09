@@ -25,40 +25,34 @@ import org.gradle.api.DefaultTask;
  * This class offers some extra helper methods for caching files outside the project dir.
  * This is a convenience class that can be used instead of using the CacheContainer directly.
  */
-public abstract class CachedTask extends DefaultTask implements ICachableTask
-{
+public abstract class CachedTask extends DefaultTask implements ICachableTask {
     private boolean doesCache = true;
-    private boolean cacheSet  = false;
+    private boolean cacheSet = false;
 
-    public CachedTask()
-    {
+    public CachedTask() {
         super();
         CacheContainer.getCache(this);
     }
 
-    protected boolean defaultCache()
-    {
+    protected boolean defaultCache() {
         return true;
     }
 
     @Override
-    public boolean doesCache()
-    {
+    public boolean doesCache() {
         if (cacheSet)
             return doesCache;
         else
             return defaultCache();
     }
 
-    public void setDoesCache(boolean cacheStuff)
-    {
+    public void setDoesCache(boolean cacheStuff) {
         this.cacheSet = true;
         this.doesCache = cacheStuff;
     }
 
     @Override
-    public boolean cacheClassHash()
-    {
+    public boolean cacheClassHash() {
         return false;
     }
 }

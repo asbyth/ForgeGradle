@@ -19,15 +19,13 @@
  */
 package net.minecraftforge.gradle.patcher;
 
-import static net.minecraftforge.gradle.common.Constants.*;
-import static net.minecraftforge.gradle.patcher.PatcherConstants.*;
+import com.google.common.base.Strings;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import com.google.common.io.Resources;
 import groovy.lang.Closure;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
 import net.minecraftforge.gradle.common.BasePlugin;
 import net.minecraftforge.gradle.common.Constants;
 import net.minecraftforge.gradle.tasks.*;
@@ -35,7 +33,6 @@ import net.minecraftforge.gradle.util.CopyInto;
 import net.minecraftforge.gradle.util.GradleConfigurationException;
 import net.minecraftforge.gradle.util.json.version.Library;
 import net.minecraftforge.gradle.util.json.version.Version;
-
 import org.gradle.api.Action;
 import org.gradle.api.NamedDomainObjectContainer;
 import org.gradle.api.Task;
@@ -44,34 +41,31 @@ import org.gradle.api.tasks.Delete;
 import org.gradle.api.tasks.bundling.Jar;
 import org.gradle.api.tasks.bundling.Zip;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import com.google.common.io.Resources;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
-public class PatcherPlugin extends BasePlugin<PatcherExtension>
-{
+import static net.minecraftforge.gradle.common.Constants.*;
+import static net.minecraftforge.gradle.patcher.PatcherConstants.*;
+
+public class PatcherPlugin extends BasePlugin<PatcherExtension> {
     @Override
-    public void applyPlugin()
-    {
+    public void applyPlugin() {
         // create and add the namedDomainObjectContainer to the extension object
 
         NamedDomainObjectContainer<PatcherProject> container = project.container(PatcherProject.class, new PatcherProjectFactory(this));
         getExtension().setProjectContainer(container);
         container.whenObjectAdded(new Action<PatcherProject>() {
             @Override
-            public void execute(PatcherProject arg0)
-            {
+            public void execute(PatcherProject arg0) {
                 createProject(arg0);
             }
 
         });
         container.whenObjectRemoved(new Action<PatcherProject>() {
             @Override
-            public void execute(PatcherProject arg0)
-            {
+            public void execute(PatcherProject arg0) {
                 removeProject(arg0);
             }
 
@@ -103,8 +97,7 @@ public class PatcherPlugin extends BasePlugin<PatcherExtension>
         makeCleanTasks();
     }
 
-    protected void makeGeneralSetupTasks()
-    {
+    protected void makeGeneralSetupTasks() {
         DeobfuscateJar deobfJar = makeTask(TASK_DEOBF, DeobfuscateJar.class);
         {
             deobfJar.setInJar(delayedFile(Constants.JAR_MERGED));
@@ -156,8 +149,7 @@ public class PatcherPlugin extends BasePlugin<PatcherExtension>
         }
     }
 
-    protected void makePackagingTasks()
-    {
+    protected void makePackagingTasks() {
         // for universal
 
         TaskReobfuscate obf = makeTask(TASK_REOBFUSCATE, TaskReobfuscate.class);
@@ -215,10 +207,10 @@ public class PatcherPlugin extends BasePlugin<PatcherExtension>
             outputJar.from(delayedFile(BINPATCH_RUN));
             outputJar.from(delayedFile(DEOBF_DATA));
             outputJar.from(delayedFile(JSON_UNIVERSAL));
-            outputJar.setBaseName(project.getName());
+            outputJar.getArchiveBaseName().set(project.getName());
             outputJar.setDuplicatesStrategy(DuplicatesStrategy.EXCLUDE);
             outputJar.getOutputs().upToDateWhen(Constants.CALL_FALSE); // rebuild every time.
-            outputJar.setDestinationDir(new File(DIR_OUTPUT));
+            outputJar.getDestinationDirectory().set(new File(DIR_OUTPUT));
             outputJar.dependsOn(genBinPatches, extractObfClasses, compressDeobf, procJson);
         }
 
@@ -240,10 +232,10 @@ public class PatcherPlugin extends BasePlugin<PatcherExtension>
             installer.from(outputJar);
             installer.from(delayedTree(JAR_INSTALLER), new CopyInto(PatcherPlugin.class, "", "!*.json", "!*.png"));
             installer.from(delayedTree(JSON_INSTALLER));
-            installer.setBaseName(project.getName());
-            installer.setClassifier("installer");
-            installer.setExtension("jar");
-            installer.setDestinationDir(new File(DIR_OUTPUT));
+            installer.getArchiveBaseName().set(project.getName());
+            installer.getArchiveClassifier().set("installer");
+            installer.getArchiveExtension().set("jar");
+            installer.getDestinationDirectory().set(new File(DIR_OUTPUT));
             installer.setDuplicatesStrategy(DuplicatesStrategy.EXCLUDE);
             installer.getOutputs().upToDateWhen(Constants.CALL_FALSE); // rebuild every time.
             installer.dependsOn(dlInstaller, outputJar, procJson);
@@ -264,8 +256,8 @@ public class PatcherPlugin extends BasePlugin<PatcherExtension>
         Zip combineRes = makeTask(TASK_COMBINE_RESOURCES, Zip.class);
         {
             File out = delayedFile(ZIP_USERDEV_RES).call();
-            combineRes.setDestinationDir(out.getParentFile());
-            combineRes.setArchiveName(out.getName());
+            combineRes.getDestinationDirectory().set(out.getParentFile());
+            combineRes.getArchiveBaseName().set(out.getName());
             combineRes.setIncludeEmptyDirs(false);
             combineRes.setDuplicatesStrategy(DuplicatesStrategy.EXCLUDE);
         }
@@ -286,8 +278,8 @@ public class PatcherPlugin extends BasePlugin<PatcherExtension>
         Zip packagePatches = makeTask(TASK_PATCHES_USERDEV, Zip.class);
         {
             File out = delayedFile(ZIP_USERDEV_PATCHES).call();
-            packagePatches.setDestinationDir(out.getParentFile());
-            packagePatches.setArchiveName(out.getName());
+            packagePatches.getDestinationDirectory().set(out.getParentFile());
+            packagePatches.getArchiveBaseName().set(out.getName());
             packagePatches.from(delayedFile(DIR_USERDEV_PATCHES));
             packagePatches.dependsOn(userdevPatches);
         }
@@ -297,20 +289,19 @@ public class PatcherPlugin extends BasePlugin<PatcherExtension>
             userdev.from(delayedFile(DIR_USERDEV));
             userdev.from(getExtension().getDelayedVersionJson()); // cant forge that now can we..
             userdev.rename(".+-dev\\.json", "dev.json");
-            userdev.setBaseName(project.getName());
-            userdev.setClassifier("userdev");
-            userdev.setExtension("jar");
-            userdev.setDestinationDir(new File(DIR_OUTPUT));
+            userdev.getArchiveBaseName().set(project.getName());
+            userdev.getArchiveClassifier().set("userdev");
+            userdev.getArchiveExtension().set("jar");
+            userdev.getDestinationDirectory().set(new File(DIR_OUTPUT));
             userdev.setDuplicatesStrategy(DuplicatesStrategy.EXCLUDE);
             userdev.getOutputs().upToDateWhen(Constants.CALL_FALSE); // rebuild every time.
             userdev.dependsOn(genBinPatches, extractObfClasses, packagePatches, extractNonMcSources, combineRes, mergeFiles);
         }
     }
 
-    protected void makeCleanTasks()
-    {
+    protected void makeCleanTasks() {
         RemapSources remapCleanTask = makeTask(TASK_CLEAN_REMAP, RemapSources.class);
-        {
+
             remapCleanTask.setInJar(delayedFile(JAR_DECOMP_POST));
             remapCleanTask.setOutJar(delayedFile(JAR_REMAPPED));
             remapCleanTask.setMethodsCsv(delayedFile(Constants.CSV_METHOD));
@@ -319,100 +310,93 @@ public class PatcherPlugin extends BasePlugin<PatcherExtension>
             remapCleanTask.setAddsJavadocs(false);
             remapCleanTask.setDoesCache(false);
             remapCleanTask.dependsOn(TASK_POST_DECOMP);
-        }
 
         Object delayedRemapped = delayedFile(JAR_REMAPPED);
 
         ExtractTask extractSrc = makeTask(TASK_CLEAN_EXTRACT_SRC, ExtractTask.class);
-        {
-            extractSrc.from(delayedRemapped);
-            extractSrc.into(subWorkspace("Clean" + DIR_EXTRACTED_SRC));
-            extractSrc.include("*.java", "**/*.java");
-            extractSrc.setDoesCache(false);
-            extractSrc.dependsOn(remapCleanTask, TASK_GEN_PROJECTS);
-        }
+
+        extractSrc.from(delayedRemapped);
+        extractSrc.into(subWorkspace("Clean" + DIR_EXTRACTED_SRC));
+        extractSrc.include("*.java", "**/*.java");
+        extractSrc.setDoesCache(false);
+        extractSrc.dependsOn(remapCleanTask, TASK_GEN_PROJECTS);
+
 
         ExtractTask extractRes = makeTask(TASK_CLEAN_EXTRACT_RES, ExtractTask.class);
-        {
-            extractRes.from(delayedRemapped);
-            extractRes.into(subWorkspace("Clean" + DIR_EXTRACTED_RES));
-            extractRes.exclude("*.java", "**/*.java");
-            extractRes.setDoesCache(false);
-            extractRes.dependsOn(remapCleanTask, TASK_GEN_PROJECTS);
-        }
+        extractRes.from(delayedRemapped);
+        extractRes.into(subWorkspace("Clean" + DIR_EXTRACTED_RES));
+        extractRes.exclude("*.java", "**/*.java");
+        extractRes.setDoesCache(false);
+        extractRes.dependsOn(remapCleanTask, TASK_GEN_PROJECTS);
+
 
         CreateStartTask makeStart = makeTask(TASK_CLEAN_MAKE_START, CreateStartTask.class);
-        {
-            for (String resource : GRADLE_START_RESOURCES)
-            {
-                makeStart.addResource(resource);
-            }
 
-            makeStart.addReplacement("@@ASSETINDEX@@", delayedString(REPLACE_ASSET_INDEX));
-            makeStart.addReplacement("@@ASSETSDIR@@", delayedFile(DIR_ASSETS));
-            makeStart.addReplacement("@@NATIVESDIR@@", delayedFile(Constants.DIR_NATIVES));
-            makeStart.addReplacement("@@SRGDIR@@", delayedFile(DIR_MCP_MAPPINGS + "/srgs/"));
-            makeStart.addReplacement("@@SRG_NOTCH_SRG@@", delayedFile(SRG_NOTCH_TO_SRG));
-            makeStart.addReplacement("@@SRG_NOTCH_MCP@@", delayedFile(SRG_NOTCH_TO_MCP));
-            makeStart.addReplacement("@@SRG_SRG_MCP@@", delayedFile(SRG_SRG_TO_MCP));
-            makeStart.addReplacement("@@SRG_MCP_SRG@@", delayedFile(SRG_MCP_TO_SRG));
-            makeStart.addReplacement("@@SRG_MCP_NOTCH@@", delayedFile(SRG_MCP_TO_NOTCH));
-            makeStart.addReplacement("@@CSVDIR@@", delayedFile(DIR_MCP_MAPPINGS));
-            makeStart.addReplacement("@@BOUNCERCLIENT@@", "net.minecraft.client.main.Main");
-            makeStart.addReplacement("@@TWEAKERCLIENT@@", "");
-            makeStart.addReplacement("@@BOUNCERSERVER@@", "net.minecraft.server.MinecraftServer");
-            makeStart.addReplacement("@@TWEAKERSERVER@@", "");
-            makeStart.setStartOut(subWorkspace("Clean" + DIR_EXTRACTED_START));
-            makeStart.setDoesCache(false);
-            makeStart.dependsOn(TASK_DL_ASSET_INDEX, TASK_DL_ASSETS, TASK_EXTRACT_NATIVES);
-            makeStart.getOutputs().upToDateWhen(Constants.CALL_FALSE); //TODO: Abrar, Fix this...
+        for (String resource : GRADLE_START_RESOURCES) {
+            makeStart.addResource(resource);
         }
+
+        makeStart.addReplacement("@@ASSETINDEX@@", delayedString(REPLACE_ASSET_INDEX));
+        makeStart.addReplacement("@@ASSETSDIR@@", delayedFile(DIR_ASSETS));
+        makeStart.addReplacement("@@NATIVESDIR@@", delayedFile(Constants.DIR_NATIVES));
+        makeStart.addReplacement("@@SRGDIR@@", delayedFile(DIR_MCP_MAPPINGS + "/srgs/"));
+        makeStart.addReplacement("@@SRG_NOTCH_SRG@@", delayedFile(SRG_NOTCH_TO_SRG));
+        makeStart.addReplacement("@@SRG_NOTCH_MCP@@", delayedFile(SRG_NOTCH_TO_MCP));
+        makeStart.addReplacement("@@SRG_SRG_MCP@@", delayedFile(SRG_SRG_TO_MCP));
+        makeStart.addReplacement("@@SRG_MCP_SRG@@", delayedFile(SRG_MCP_TO_SRG));
+        makeStart.addReplacement("@@SRG_MCP_NOTCH@@", delayedFile(SRG_MCP_TO_NOTCH));
+        makeStart.addReplacement("@@CSVDIR@@", delayedFile(DIR_MCP_MAPPINGS));
+        makeStart.addReplacement("@@BOUNCERCLIENT@@", "net.minecraft.client.main.Main");
+        makeStart.addReplacement("@@TWEAKERCLIENT@@", "");
+        makeStart.addReplacement("@@BOUNCERSERVER@@", "net.minecraft.server.MinecraftServer");
+        makeStart.addReplacement("@@TWEAKERSERVER@@", "");
+        makeStart.setStartOut(subWorkspace("Clean" + DIR_EXTRACTED_START));
+        makeStart.setDoesCache(false);
+        makeStart.dependsOn(TASK_DL_ASSET_INDEX, TASK_DL_ASSETS, TASK_EXTRACT_NATIVES);
+        makeStart.getOutputs().upToDateWhen(Constants.CALL_FALSE); //TODO: Abrar, Fix this...
+
 
         GenEclipseRunTask eclipseClient = makeTask(TASK_CLEAN_RUNE_CLIENT, GenEclipseRunTask.class);
-        {
-            eclipseClient.setMainClass(GRADLE_START_CLIENT);
-            eclipseClient.setProjectName("Clean");
-            eclipseClient.setOutputFile(subWorkspace("Clean/Clean Client.launch"));
-            eclipseClient.setRunDir(subWorkspace("run"));
-            eclipseClient.dependsOn(makeStart, TASK_GEN_IDES);
-        }
+
+        eclipseClient.setMainClass(GRADLE_START_CLIENT);
+        eclipseClient.setProjectName("Clean");
+        eclipseClient.setOutputFile(subWorkspace("Clean/Clean Client.launch"));
+        eclipseClient.setRunDir(subWorkspace("run"));
+        eclipseClient.dependsOn(makeStart, TASK_GEN_IDES);
+
 
         GenEclipseRunTask eclipseServer = makeTask(TASK_CLEAN_RUNE_SERVER, GenEclipseRunTask.class);
-        {
-            eclipseServer.setMainClass(GRADLE_START_SERVER);
-            eclipseServer.setProjectName("Clean");
-            eclipseServer.setOutputFile(subWorkspace("Clean/Clean Server.launch"));
-            eclipseServer.setRunDir(subWorkspace("run"));
-            eclipseServer.dependsOn(makeStart, TASK_GEN_IDES);
-        }
+
+        eclipseServer.setMainClass(GRADLE_START_SERVER);
+        eclipseServer.setProjectName("Clean");
+        eclipseServer.setOutputFile(subWorkspace("Clean/Clean Server.launch"));
+        eclipseServer.setRunDir(subWorkspace("run"));
+        eclipseServer.dependsOn(makeStart, TASK_GEN_IDES);
 
         TaskGenIdeaRun ideaClient = makeTask(TASK_CLEAN_RUNJ_CLIENT, TaskGenIdeaRun.class);
-        {
-            ideaClient.setMainClass(GRADLE_START_CLIENT);
-            ideaClient.setProjectName("Clean");
-            ideaClient.setConfigName("Clean Client");
-            ideaClient.setOutputFile(subWorkspace("/.idea/runConfigurations/Clean_Client.xml"));
-            ideaClient.setRunDir("file://$PROJECT_DIR$/run");
-            ideaClient.dependsOn(makeStart, TASK_GEN_IDES);
-        }
+
+        ideaClient.setMainClass(GRADLE_START_CLIENT);
+        ideaClient.setProjectName("Clean");
+        ideaClient.setConfigName("Clean Client");
+        ideaClient.setOutputFile(subWorkspace("/.idea/runConfigurations/Clean_Client.xml"));
+        ideaClient.setRunDir("file://$PROJECT_DIR$/run");
+        ideaClient.dependsOn(makeStart, TASK_GEN_IDES);
 
         TaskGenIdeaRun ideaServer = makeTask(TASK_CLEAN_RUNJ_SERVER, TaskGenIdeaRun.class);
-        {
-            ideaServer.setMainClass(GRADLE_START_SERVER);
-            ideaServer.setProjectName("Clean");
-            ideaServer.setConfigName("Clean Server");
-            ideaServer.setOutputFile(subWorkspace("/.idea/runConfigurations/Clean_Server.xml"));
-            ideaServer.setRunDir("file://$PROJECT_DIR$/run");
-            ideaServer.dependsOn(makeStart, TASK_GEN_IDES);
-        }
+
+        ideaServer.setMainClass(GRADLE_START_SERVER);
+        ideaServer.setProjectName("Clean");
+        ideaServer.setConfigName("Clean Server");
+        ideaServer.setOutputFile(subWorkspace("/.idea/runConfigurations/Clean_Server.xml"));
+        ideaServer.setRunDir("file://$PROJECT_DIR$/run");
+        ideaServer.dependsOn(makeStart, TASK_GEN_IDES);
 
         // add depends
         project.getTasks().getByName(TASK_GEN_IDES).dependsOn(extractSrc, extractRes, makeStart);
         project.getTasks().getByName(TASK_SETUP).dependsOn(eclipseClient, eclipseServer, ideaClient, ideaServer);
     }
 
-    protected void createProject(PatcherProject patcher)
-    {
+    protected void createProject(PatcherProject patcher) {
         PatchSourcesTask patch = makeTask(projectString(TASK_PROJECT_PATCH, patcher), PatchSourcesTask.class);
         {
             // inJar is set afterEvaluate depending on the patch order.
@@ -444,7 +428,7 @@ public class PatcherPlugin extends BasePlugin<PatcherExtension>
                 patcher.getDelayedResourcesDir(),
                 patcher.getDelayedTestSourcesDir(),
                 patcher.getDelayedTestResourcesDir()
-                );
+        );
 
         ExtractTask extractSrc = makeTask(projectString(TASK_PROJECT_EXTRACT_SRC, patcher), ExtractTask.class);
         {
@@ -473,13 +457,11 @@ public class PatcherPlugin extends BasePlugin<PatcherExtension>
 
         CreateStartTask makeStart = makeTask(projectString(TASK_PROJECT_MAKE_START, patcher), CreateStartTask.class);
         {
-            for (String resource : GRADLE_START_RESOURCES)
-            {
+            for (String resource : GRADLE_START_RESOURCES) {
                 makeStart.addResource(resource);
             }
 
-            for (String resource : GRADLE_START_FML_RES)
-            {
+            for (String resource : GRADLE_START_FML_RES) {
                 makeStart.addResource(resource);
             }
 
@@ -556,59 +538,52 @@ public class PatcherPlugin extends BasePlugin<PatcherExtension>
         /// TASKS THAT ARN'T PART OF THE SETUP
 
         TaskSubprojectCall compile = makeTask(projectString(TASK_PROJECT_COMPILE, patcher), TaskSubprojectCall.class);
-        {
-            compile.setProjectDir(subWorkspace(patcher.getCapName()));
-            compile.setCallLine("jar");
-            compile.addInitScript(Resources.getResource(TaskSubprojectCall.class, "initscriptJar.gradle"));
-            compile.addReplacement("@RECOMP_DIR@", delayedFile(projectString(DIR_PROJECT_CACHE, patcher)));
-            compile.addReplacement("@JAR_NAME@", JAR_PROJECT_RECOMPILED.substring(DIR_PROJECT_CACHE.length() + 1));
-            compile.mustRunAfter(setupTask);
-        }
+
+        compile.setProjectDir(subWorkspace(patcher.getCapName()));
+        compile.setCallLine("jar");
+        compile.addInitScript(Resources.getResource(TaskSubprojectCall.class, "initscriptJar.gradle"));
+        compile.addReplacement("@RECOMP_DIR@", delayedFile(projectString(DIR_PROJECT_CACHE, patcher)));
+        compile.addReplacement("@JAR_NAME@", JAR_PROJECT_RECOMPILED.substring(DIR_PROJECT_CACHE.length() + 1));
+        compile.mustRunAfter(setupTask);
 
         TaskExtractExcModifiers extractExc = makeTask(projectString(TASK_PROJECT_GEN_EXC, patcher), TaskExtractExcModifiers.class);
-        {
-            extractExc.setInJar(delayedFile(projectString(JAR_PROJECT_RECOMPILED, patcher)));
-            extractExc.setOutExc(delayedFile(projectString(EXC_PROJECT, patcher)));
-            extractExc.dependsOn(compile);
-        }
+        extractExc.setInJar(delayedFile(projectString(JAR_PROJECT_RECOMPILED, patcher)));
+        extractExc.setOutExc(delayedFile(projectString(EXC_PROJECT, patcher)));
+        extractExc.dependsOn(compile);
 
         ExtractS2SRangeTask extractRangemap = makeTask(projectString(TASK_PROJECT_RANGEMAP, patcher), ExtractS2SRangeTask.class);
-        {
-            extractRangemap.addSource(patcher.getDelayedSourcesDir());
-            extractRangemap.addSource(subWorkspace(patcher.getCapName() + DIR_EXTRACTED_SRC));
-            extractRangemap.setRangeMap(delayedFile(projectString(RANGEMAP_PROJECT, patcher)));
-            extractRangemap.addLibs(project.getConfigurations().getByName(Constants.CONFIG_MC_DEPS));
-            extractRangemap.addLibs(delayedFile(projectString(JAR_PROJECT_RECOMPILED, patcher)));
-            extractRangemap.dependsOn(compile);
-        }
+        extractRangemap.addSource(patcher.getDelayedSourcesDir());
+        extractRangemap.addSource(subWorkspace(patcher.getCapName() + DIR_EXTRACTED_SRC));
+        extractRangemap.setRangeMap(delayedFile(projectString(RANGEMAP_PROJECT, patcher)));
+        extractRangemap.addLibs(project.getConfigurations().getByName(Constants.CONFIG_MC_DEPS));
+        extractRangemap.addLibs(delayedFile(projectString(JAR_PROJECT_RECOMPILED, patcher)));
+        extractRangemap.dependsOn(compile);
+
 
         ApplyS2STask retromap = makeTask(projectString(TASK_PROJECT_RETROMAP, patcher), ApplyS2STask.class);
-        {
-            retromap.addSource(subWorkspace(patcher.getCapName() + DIR_EXTRACTED_SRC));
-            retromap.setOut(delayedFile(projectString(JAR_PROJECT_RETROMAPPED, patcher)));
-            retromap.addSrg(delayedFile(SRG_MCP_TO_SRG));
-            retromap.addExc(delayedFile(EXC_MCP));
-            retromap.addExc(delayedFile(EXC_SRG)); // just in case
-            retromap.setExcModifiers(delayedFile(projectString(EXC_PROJECT, patcher)));
-            retromap.setRangeMap(delayedFile(projectString(RANGEMAP_PROJECT, patcher)));
-            retromap.dependsOn(TASK_GENERATE_SRGS, extractExc, extractRangemap);
-        }
+        retromap.addSource(subWorkspace(patcher.getCapName() + DIR_EXTRACTED_SRC));
+        retromap.setOut(delayedFile(projectString(JAR_PROJECT_RETROMAPPED, patcher)));
+        retromap.addSrg(delayedFile(SRG_MCP_TO_SRG));
+        retromap.addExc(delayedFile(EXC_MCP));
+        retromap.addExc(delayedFile(EXC_SRG)); // just in case
+        retromap.setExcModifiers(delayedFile(projectString(EXC_PROJECT, patcher)));
+        retromap.setRangeMap(delayedFile(projectString(RANGEMAP_PROJECT, patcher)));
+        retromap.dependsOn(TASK_GENERATE_SRGS, extractExc, extractRangemap);
 
         ApplyS2STask retromapNonMc = makeTask(projectString(TASK_PROJECT_RETRO_NONMC, patcher), ApplyS2STask.class);
-        {
-            retromapNonMc.addSource(patcher.getDelayedSourcesDir());
-            retromapNonMc.setOut(delayedFile(projectString(JAR_PROJECT_RETRO_NONMC, patcher)));
-            retromapNonMc.addSrg(delayedFile(SRG_MCP_TO_SRG));
-            retromapNonMc.addExc(delayedFile(EXC_MCP));
-            retromapNonMc.addExc(delayedFile(EXC_SRG)); // just in case
-            retromapNonMc.setExcModifiers(delayedFile(projectString(EXC_PROJECT, patcher)));
-            retromapNonMc.setRangeMap(delayedFile(projectString(RANGEMAP_PROJECT, patcher)));
-            retromapNonMc.dependsOn(TASK_GENERATE_SRGS, extractExc, extractRangemap);
-        }
+
+        retromapNonMc.addSource(patcher.getDelayedSourcesDir());
+        retromapNonMc.setOut(delayedFile(projectString(JAR_PROJECT_RETRO_NONMC, patcher)));
+        retromapNonMc.addSrg(delayedFile(SRG_MCP_TO_SRG));
+        retromapNonMc.addExc(delayedFile(EXC_MCP));
+        retromapNonMc.addExc(delayedFile(EXC_SRG)); // just in case
+        retromapNonMc.setExcModifiers(delayedFile(projectString(EXC_PROJECT, patcher)));
+        retromapNonMc.setRangeMap(delayedFile(projectString(RANGEMAP_PROJECT, patcher)));
+        retromapNonMc.dependsOn(TASK_GENERATE_SRGS, extractExc, extractRangemap);
+
     }
 
-    protected void removeProject(PatcherProject patcher)
-    {
+    protected void removeProject(PatcherProject patcher) {
         project.getTasks().remove(project.getTasks().getByName(projectString(TASK_PROJECT_REMAP_JAR, patcher)));
         project.getTasks().remove(project.getTasks().getByName(projectString(TASK_PROJECT_EXTRACT_SRC, patcher)));
         project.getTasks().remove(project.getTasks().getByName(projectString(TASK_PROJECT_EXTRACT_RES, patcher)));
@@ -627,77 +602,63 @@ public class PatcherPlugin extends BasePlugin<PatcherExtension>
         project.getTasks().remove(project.getTasks().getByName(projectString(TASK_PROJECT_RETRO_NONMC, patcher)));
     }
 
-    public void afterEvaluate()
-    {
+    public void afterEvaluate() {
         super.afterEvaluate();
 
         // validate files
-        {
-            File versionJson = getExtension().getVersionJson();
-            File workspaceDir = getExtension().getWorkspaceDir();
 
-            if (workspaceDir == null)
-            {
-                throw new GradleConfigurationException("A workspaceDir must be specified! eg: minecraft { workspaceDir = 'someDir' }");
-            }
+        File versionJson = getExtension().getVersionJson();
+        File workspaceDir = getExtension().getWorkspaceDir();
 
-            if (versionJson == null || !versionJson.exists())
-            {
-                throw new GradleConfigurationException("The versionJson could not be found! Are you sure its correct?");
-            }
-
-            if (((TaskProcessJson) project.getTasks().getByName(TASK_PROCESS_JSON)).isReleaseJsonNull())
-            {
-                throw new GradleConfigurationException("Release json not confgiured! add this to your buildscript:  "
-                        + TASK_PROCESS_JSON + " { releaseJson = 'path/to/release.json' }");
-            }
-
-            if (Strings.isNullOrEmpty(getExtension().getInstallerVersion()) && getExtension().isBuildInstaller())
-            {
-                throw new GradleConfigurationException("You must specify the installerVersion in the minecraft block if you want to build an installer!");
-            }
+        if (workspaceDir == null) {
+            throw new GradleConfigurationException("A workspaceDir must be specified! eg: minecraft { workspaceDir = 'someDir' }");
         }
 
+        if (versionJson == null || !versionJson.exists()) {
+            throw new GradleConfigurationException("The versionJson could not be found! Are you sure its correct?");
+        }
+
+        if (((TaskProcessJson) project.getTasks().getByName(TASK_PROCESS_JSON)).isReleaseJsonNull()) {
+            throw new GradleConfigurationException("Release json not confgiured! add this to your buildscript:  "
+                    + TASK_PROCESS_JSON + " { releaseJson = 'path/to/release.json' }");
+        }
+
+        if (Strings.isNullOrEmpty(getExtension().getInstallerVersion()) && getExtension().isBuildInstaller()) {
+            throw new GradleConfigurationException("You must specify the installerVersion in the minecraft block if you want to build an installer!");
+        }
+
+
         // use versionJson stuff
-        {
-            File versionJson = getExtension().getVersionJson();
-            Version version = parseAndStoreVersion(versionJson, versionJson.getParentFile(), delayedFile(Constants.DIR_JSONS).call());
+        Version version = parseAndStoreVersion(versionJson, versionJson.getParentFile(), delayedFile(Constants.DIR_JSONS).call());
 
-            TaskGenSubprojects createProjects = (TaskGenSubprojects) project.getTasks().getByName(TASK_GEN_PROJECTS);
-            Set<String> repos = Sets.newHashSet();
+        TaskGenSubprojects createProjects = (TaskGenSubprojects) project.getTasks().getByName(TASK_GEN_PROJECTS);
+        Set<String> repos = Sets.newHashSet();
 
-            for (Library lib : version.getLibraries())
-            {
-                if (lib.applies() && lib.extract == null)
-                {
-                    createProjects.addCompileDep(lib.getArtifactName());
+        for (Library lib : version.getLibraries()) {
+            if (lib.applies() && lib.extract == null) {
+                createProjects.addCompileDep(lib.getArtifactName());
 
-                    // add repo for url if its not the MC repo, not maven central, and not already added
-                    String url = lib.getUrl();
-                    if (!url.contains("libraries.minecraft.net") && !url.contains("maven.apache.org") && !repos.contains(url))
-                    {
-                        createProjects.addRepo("jsonRepo" + repos.size(), url);
+                // add repo for url if its not the MC repo, not maven central, and not already added
+                String url = lib.getUrl();
+                if (!url.contains("libraries.minecraft.net") && !url.contains("maven.apache.org") && !repos.contains(url)) {
+                    createProjects.addRepo("jsonRepo" + repos.size(), url);
 
-                        // add it to here too!
-                        this.addMavenRepo(project, "jsonRepo" + repos.size(), url);
+                    // add it to here too!
+                    this.addMavenRepo(project, "jsonRepo" + repos.size(), url);
 
-                        repos.add(url);
-                    }
+                    repos.add(url);
                 }
             }
         }
 
         // enable installer and userdev
-        {
-            Task build = project.getTasks().getByName(TASK_BUILD);
-            if (getExtension().isBuildUserdev())
-            {
-                build.dependsOn(TASK_BUILD_USERDEV);
-            }
-            if (getExtension().isBuildInstaller())
-            {
-                build.dependsOn(TASK_BUILD_INSTALLER);
-            }
+
+        Task build = project.getTasks().getByName(TASK_BUILD);
+        if (getExtension().isBuildUserdev()) {
+            build.dependsOn(TASK_BUILD_USERDEV);
+        }
+        if (getExtension().isBuildInstaller()) {
+            build.dependsOn(TASK_BUILD_INSTALLER);
         }
 
         List<PatcherProject> patchersList = sortByPatching(getExtension().getProjects());
@@ -717,21 +678,18 @@ public class PatcherPlugin extends BasePlugin<PatcherExtension>
 
         PatcherProject lastPatcher = null;
 
-        for (PatcherProject patcher : patchersList)
-        {
+        for (PatcherProject patcher : patchersList) {
             patcher.validate(); // validate project
 
-            if (patcher.isApplyMcpPatches())
-            {
-                PatchSourcesTask patch = (PatchSourcesTask) project.getTasks().getByName(projectString(TASK_PROJECT_PATCH, patcher));
-                RemapSources remap = (RemapSources) project.getTasks().getByName(projectString(TASK_PROJECT_REMAP_JAR, patcher));
+            PatchSourcesTask patch = (PatchSourcesTask) project.getTasks().getByName(projectString(TASK_PROJECT_PATCH, patcher));
+            RemapSources remap = (RemapSources) project.getTasks().getByName(projectString(TASK_PROJECT_REMAP_JAR, patcher));
+            if (patcher.isApplyMcpPatches()) {
 
                 // configure the patches to happen after remap
                 patch.dependsOn(remap);
                 patch.setInJar(delayedFile(projectString(JAR_PROJECT_REMAPPED, patcher)));
                 // configure patching input and injects
-                if (lastPatcher != null)
-                {
+                if (lastPatcher != null) {
                     remap.dependsOn(projectString(TASK_PROJECT_REMAP_JAR, lastPatcher));
                     remap.setInJar(delayedFile(projectString(JAR_PROJECT_REMAPPED, lastPatcher)));
                     patch.addInject(lastPatcher.getDelayedSourcesDir());
@@ -744,18 +702,13 @@ public class PatcherPlugin extends BasePlugin<PatcherExtension>
                 Object patched = delayedFile(projectString(JAR_PROJECT_PATCHED, patcher));
                 ((ExtractTask) project.getTasks().getByName(projectString(TASK_PROJECT_EXTRACT_SRC, patcher))).from(patched);
                 ((ExtractTask) project.getTasks().getByName(projectString(TASK_PROJECT_EXTRACT_RES, patcher))).from(patched);
-            }
-            else
-            {
-                PatchSourcesTask patch = (PatchSourcesTask) project.getTasks().getByName(projectString(TASK_PROJECT_PATCH, patcher));
-                RemapSources remap = (RemapSources) project.getTasks().getByName(projectString(TASK_PROJECT_REMAP_JAR, patcher));
+            } else {
 
                 // configure the patches to happen AFTER remap
                 remap.dependsOn(patch);
                 remap.setInJar(delayedFile(projectString(JAR_PROJECT_PATCHED, patcher)));
                 // configure patching input and injects
-                if (lastPatcher != null)
-                {
+                if (lastPatcher != null) {
                     patch.dependsOn(projectString(TASK_PROJECT_PATCH, lastPatcher));
                     patch.setInJar(delayedFile(projectString(JAR_PROJECT_PATCHED, lastPatcher)));
                     patch.addInject(lastPatcher.getDelayedSourcesDir());
@@ -774,36 +727,28 @@ public class PatcherPlugin extends BasePlugin<PatcherExtension>
             ApplyS2STask retromapNonMc = (ApplyS2STask) project.getTasks().getByName(projectString(TASK_PROJECT_RETRO_NONMC, patcher));
 
             // add from previous projects
-            for (File f : addedExcs)
-            {
+            for (File f : addedExcs) {
                 retromap.addExc(f);
                 retromapNonMc.addExc(f);
             }
-            for (File f : addedSrgs)
-            {
+            for (File f : addedSrgs) {
                 retromap.addSrg(f);
                 retromapNonMc.addSrg(f);
             }
 
             // add from this project
-            for (File f : project.fileTree(patcher.getResourcesDir()).getFiles())
-            {
-                if (f.getName().endsWith(".exc"))
-                {
+            for (File f : project.fileTree(patcher.getResourcesDir()).getFiles()) {
+                if (f.getName().endsWith(".exc")) {
                     retromap.addExc(f);
                     retromapNonMc.addExc(f);
                     addedExcs.add(f);
                     mergeFiles.addExc(f);
-                }
-                else if (f.getName().endsWith(".srg"))
-                {
+                } else if (f.getName().endsWith(".srg")) {
                     retromap.addSrg(f);
                     retromapNonMc.addSrg(f);
                     addedSrgs.add(f);
                     mergeFiles.addSrg(f);
-                }
-                else if (f.getName().endsWith("_at.cfg"))
-                {
+                } else if (f.getName().endsWith("_at.cfg")) {
                     // Add ATs for deobf in the same run.. why not...
                     deobfJar.addAt(f);
                     mergeFiles.addAt(f);
@@ -811,8 +756,7 @@ public class PatcherPlugin extends BasePlugin<PatcherExtension>
             }
 
             // create genPatches task for it.. if necessary
-            if (patcher.doesGenPatches())
-            {
+            if (patcher.doesGenPatches()) {
                 TaskGenPatches genPatches = makeTask(projectString(TASK_PROJECT_GEN_PATCHES, patcher), TaskGenPatches.class);
                 genPatches.setPatchDir(patcher.getPatchDir());
                 genPatches.setOriginalPrefix(patcher.getPatchPrefixOriginal());
@@ -824,32 +768,23 @@ public class PatcherPlugin extends BasePlugin<PatcherExtension>
                 // add to global task
                 genPatchesTask.dependsOn(genPatches);
 
-                if (patcher.isGenMcpPatches())
-                {
+                if (patcher.isGenMcpPatches()) {
                     genPatches.addChangedSource(subWorkspace(patcher.getCapName() + DIR_EXTRACTED_SRC));
 
-                    if ("clean".equals(patcher.getGenPatchesFrom().toLowerCase()))
-                    {
+                    if ("clean".equalsIgnoreCase(patcher.getGenPatchesFrom())) {
                         genPatches.addOriginalSource(delayedFile(JAR_REMAPPED)); // SRG named vanilla..
-                    }
-                    else
-                    {
+                    } else {
                         PatcherProject genFrom = getExtension().getProjects().getByName(patcher.getGenPatchesFrom());
                         genPatches.addOriginalSource(delayedFile(projectString(JAR_PROJECT_REMAPPED, patcher)));
                         genPatches.addOriginalSource(genFrom.getDelayedSourcesDir());
                     }
-                }
-                else
-                {
+                } else {
                     genPatches.addChangedSource(delayedFile(projectString(JAR_PROJECT_RETROMAPPED, patcher)));
                     genPatches.dependsOn(projectString(TASK_PROJECT_RETROMAP, patcher));
 
-                    if ("clean".equals(patcher.getGenPatchesFrom().toLowerCase()))
-                    {
+                    if ("clean".equalsIgnoreCase(patcher.getGenPatchesFrom())) {
                         genPatches.addOriginalSource(delayedFile(JAR_DECOMP_POST)); // SRG named vanilla..
-                    }
-                    else
-                    {
+                    } else {
                         PatcherProject genFrom = getExtension().getProjects().getByName(patcher.getGenPatchesFrom());
                         genPatches.addOriginalSource(delayedFile(projectString(JAR_PROJECT_RETROMAPPED, genFrom)));
                         genPatches.addOriginalSource(delayedFile(projectString(JAR_PROJECT_RETRO_NONMC, genFrom)));
@@ -896,13 +831,12 @@ public class PatcherPlugin extends BasePlugin<PatcherExtension>
         userdevSources.dependsOn(projectString(TASK_PROJECT_RETROMAP, patcher), projectString(TASK_PROJECT_RETRO_NONMC, patcher));
 
         // add version to packaging tasks
-        outputJar.setVersion(project.getVersion().toString());
-        ((Zip)project.getTasks().getByName(TASK_BUILD_USERDEV)).setVersion(project.getVersion().toString());
-        ((Zip)project.getTasks().getByName(TASK_BUILD_INSTALLER)).setVersion(project.getVersion().toString());
+        outputJar.getArchiveVersion().set(project.getVersion().toString());
+        ((Zip) project.getTasks().getByName(TASK_BUILD_USERDEV)).getArchiveVersion().set(project.getVersion().toString());
+        ((Zip) project.getTasks().getByName(TASK_BUILD_INSTALLER)).getArchiveVersion().set(project.getVersion().toString());
 
         // add them to the maven artifatcs
-        if (project.getPlugins().hasPlugin("maven"))
-        {
+        if (project.getPlugins().hasPlugin("maven")) {
             project.getArtifacts().add("archives", outputJar);
             project.getArtifacts().add("archives", project.getTasks().getByName(TASK_BUILD_USERDEV));
             project.getArtifacts().add("archives", project.getTasks().getByName(TASK_BUILD_INSTALLER));
@@ -913,43 +847,35 @@ public class PatcherPlugin extends BasePlugin<PatcherExtension>
      * Sorts the project into the list of patches on each other.
      * Throws GradleConfigurationException if the projects cannot be fitted into the list.
      * Doesnt support potential patching loops, but the clean project cant patch anything, so its unlikely to happen.
+     *
      * @return list of sorted projects
      */
-    private List<PatcherProject> sortByPatching(NamedDomainObjectContainer<PatcherProject> projects)
-    {
+    private List<PatcherProject> sortByPatching(NamedDomainObjectContainer<PatcherProject> projects) {
         // patcher->patched
         BiMap<PatcherProject, PatcherProject> tempMap = HashBiMap.create();
 
-        for (PatcherProject project : projects)
-        {
+        for (PatcherProject project : projects) {
             String patchAfter = project.getPatchAfter();
             PatcherProject toPut;
 
-            if (patchAfter.equals("clean"))
-            {
+            if (patchAfter.equals("clean")) {
                 toPut = null;
-            }
-            else
-            {
+            } else {
                 toPut = projects.findByName(patchAfter);
 
                 if (toPut == null)
                     throw new GradleConfigurationException("Project " + patchAfter + " does not exist! You cannot patch after it!");
 
-                if (toPut.isApplyMcpPatches() && !project.isApplyMcpPatches())
-                {
+                if (toPut.isApplyMcpPatches() && !project.isApplyMcpPatches()) {
                     // its trying to apply SRG patches after a project that does MCP patches??
                     // IMPOSSIBRU!
                     throw new GradleConfigurationException("Project " + patchAfter + " applies SRG named patches, and is attempting to patch after a project that uses MCP named patches! THATS IMPOSSIBRU!");
                 }
             }
 
-            try
-            {
+            try {
                 tempMap.put(project, toPut);
-            }
-            catch (IllegalArgumentException e)
-            {
+            } catch (IllegalArgumentException e) {
                 // must exist already.. thus a duplicate value..
                 throw new GradleConfigurationException("2 projects cannot patch after the same project '" + toPut == null ? "clean" : toPut.getName() + "'!");
             }
@@ -958,10 +884,9 @@ public class PatcherPlugin extends BasePlugin<PatcherExtension>
         // now  patched->patcher
         tempMap = tempMap.inverse();
 
-        ArrayList<PatcherProject> list = new ArrayList<PatcherProject>(projects.size());
+        ArrayList<PatcherProject> list = new ArrayList<>(projects.size());
         PatcherProject key = tempMap.remove(null); // null is clean
-        while (key != null)
-        {
+        while (key != null) {
             list.add(key);
             key = tempMap.remove(key);
         }
@@ -969,13 +894,11 @@ public class PatcherPlugin extends BasePlugin<PatcherExtension>
         return list;
     }
 
-    private Closure<File> subWorkspace(String path)
-    {
+    private Closure<File> subWorkspace(String path) {
         return getExtension().getDelayedSubWorkspaceDir(path);
     }
 
-    private String projectString(String str, PatcherProject project)
-    {
+    private String projectString(String str, PatcherProject project) {
         return str.replace("{CAPNAME}", project.getCapName()).replace("{NAME}", project.getName());
     }
 }

@@ -5,34 +5,28 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-public class Version
-{
+public class Version {
     public String id;
     public Date time;
     public Date releaseTime;
     public String type;
     public String minecraftArguments;
     public String inheritsFrom;
-    private List<Library> libraries;
     public String mainClass;
     public int minimumLauncherVersion;
     public String incompatibilityReason;
     public AssetIndexRef assetIndex;
-    private Map<String, Download> downloads;
     public List<OSRule> rules;
-
+    private List<Library> libraries;
+    private Map<String, Download> downloads;
     private List<Library> _libraries;
 
-    public List<Library> getLibraries()
-    {
-        if (_libraries == null)
-        {
+    public List<Library> getLibraries() {
+        if (_libraries == null) {
             _libraries = new ArrayList<Library>();
             if (libraries == null) return _libraries;
-            for (Library lib : libraries)
-            {
-                if (lib.applies())
-                {
+            for (Library lib : libraries) {
+                if (lib.applies()) {
                     _libraries.add(lib);
                 }
             }
@@ -40,22 +34,20 @@ public class Version
         return _libraries;
     }
 
-    public String getClientUrl()
-    {
+    public String getClientUrl() {
         return downloads.get("client").url;
     }
 
-    public String getServerUrl()
-    {
+    public String getServerUrl() {
         return downloads.get("server").url;
     }
 
     /**
      * Populates this instance with information from another version json.
+     *
      * @param version Version json to extend from
      */
-    public void extendFrom(Version version)
-    {
+    public void extendFrom(Version version) {
         // strings. replace if null.
         if (minecraftArguments == null)
             minecraftArguments = version.minecraftArguments;

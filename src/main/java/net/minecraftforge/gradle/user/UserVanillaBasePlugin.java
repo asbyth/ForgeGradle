@@ -28,19 +28,14 @@ import java.io.File;
 import java.util.List;
 
 import static net.minecraftforge.gradle.common.Constants.*;
-import static net.minecraftforge.gradle.common.Constants.REPLACE_MC_VERSION;
-import static net.minecraftforge.gradle.user.UserConstants.CONFIG_MC;
-import static net.minecraftforge.gradle.user.UserConstants.TASK_SETUP_CI;
-import static net.minecraftforge.gradle.user.UserConstants.TASK_SETUP_DEV;
+import static net.minecraftforge.gradle.user.UserConstants.*;
 
-public abstract class UserVanillaBasePlugin<T extends UserBaseExtension> extends UserBasePlugin<T>
-{
+public abstract class UserVanillaBasePlugin<T extends UserBaseExtension> extends UserBasePlugin<T> {
     private static final String CLEAN_ROOT = REPLACE_CACHE_DIR + "/net/minecraft/";
     private static final String MCP_INSERT = Constants.REPLACE_MCP_CHANNEL + "/" + Constants.REPLACE_MCP_VERSION;
 
     @Override
-    protected final void applyUserPlugin()
-    {
+    protected final void applyUserPlugin() {
         // patterns
         String cleanSuffix = "%s-" + REPLACE_MC_VERSION;
         String dirtySuffix = "%s-" + REPLACE_MC_VERSION + "-PROJECT(" + project.getName() + ")";
@@ -61,13 +56,11 @@ public abstract class UserVanillaBasePlugin<T extends UserBaseExtension> extends
     protected abstract void applyVanillaUserPlugin();
 
     @Override
-    protected void afterDecomp(final boolean isDecomp, final boolean useLocalCache, final String mcConfig)
-    {
+    protected void afterDecomp(final boolean isDecomp, final boolean useLocalCache, final String mcConfig) {
         // add MC repo to all projects
         project.allprojects(new Action<Project>() {
             @Override
-            public void execute(Project proj)
-            {
+            public void execute(Project proj) {
                 String cleanRoot = CLEAN_ROOT + getJarName() + "/" + REPLACE_MC_VERSION + "/" + MCP_INSERT;
                 addFlatRepo(proj, "VanillaMcRepo", delayedFile(useLocalCache ? DIR_LOCAL_CACHE : cleanRoot).call());
             }
@@ -82,13 +75,11 @@ public abstract class UserVanillaBasePlugin<T extends UserBaseExtension> extends
     }
 
     @Override
-    protected void afterEvaluate()
-    {
+    protected void afterEvaluate() {
         // read version file if exists
         {
             File jsonFile = delayedFile(Constants.JSON_VERSION).call();
-            if (jsonFile.exists())
-            {
+            if (jsonFile.exists()) {
                 parseAndStoreVersion(jsonFile, jsonFile.getParentFile());
             }
         }
@@ -98,33 +89,32 @@ public abstract class UserVanillaBasePlugin<T extends UserBaseExtension> extends
 
     /**
      * Correctly invoke the makeDecomptasks() method from the UserBasePlugin
+     *
      * @param globalPattern pattern for convenience
-     * @param localPattern pattern for convenience
+     * @param localPattern  pattern for convenience
      */
     protected abstract void createDecompTasks(String globalPattern, String localPattern);
 
     /**
      * The name of the cached artifacts. The name of the API.. primary identifier.. thing.
+     *
      * @return "Minecraft" or "Minecraft_server" or something.
      */
     protected abstract String getJarName();
 
     @Override
-    protected Object getStartDir()
-    {
+    protected Object getStartDir() {
         return delayedFile(REPLACE_CACHE_DIR + "/net/minecraft/" + getJarName() + "/" + REPLACE_MC_VERSION + "/start");
     }
 
     @Override
-    protected List<String> getClientRunArgs(T ext)
-    {
+    protected List<String> getClientRunArgs(T ext) {
         List<String> out = ext.getResolvedClientRunArgs();
         return out;
     }
 
     @Override
-    protected List<String> getServerRunArgs(T ext)
-    {
+    protected List<String> getServerRunArgs(T ext) {
         List<String> out = ext.getResolvedServerRunArgs();
         return out;
     }

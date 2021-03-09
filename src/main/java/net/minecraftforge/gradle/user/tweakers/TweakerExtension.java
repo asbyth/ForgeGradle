@@ -22,33 +22,27 @@ package net.minecraftforge.gradle.user.tweakers;
 import net.minecraftforge.gradle.common.Constants;
 import net.minecraftforge.gradle.user.UserBaseExtension;
 
-public class TweakerExtension extends UserBaseExtension
-{
+public class TweakerExtension extends UserBaseExtension {
     private Object tweakClass;
     private Object mainClass = "net.minecraft.launchwrapper.Launch";
-    
-    public TweakerExtension(TweakerPlugin plugin)
-    {
+
+    public TweakerExtension(TweakerPlugin plugin) {
         super(plugin);
     }
 
-    public String getTweakClass()
-    {
+    public String getTweakClass() {
         return Constants.resolveString(tweakClass);
     }
 
-    public void setTweakClass(Object tweakClass)
-    {
+    public void setTweakClass(Object tweakClass) {
         this.tweakClass = tweakClass;
     }
 
-    public String getMainClass()
-    {
+    public String getMainClass() {
         return Constants.resolveString(mainClass);
     }
 
-    public void setMainClass(Object mainClass)
-    {
+    public void setMainClass(Object mainClass) {
         this.mainClass = mainClass;
     }
 }

@@ -74,9 +74,9 @@ class Base64 {
                 break;
             }
             int tri = (decode(s.charAt(i)) << 18)
-                + (decode(s.charAt(i + 1)) << 12)
-                + (decode(s.charAt(i + 2)) << 6)
-                + (decode(s.charAt(i + 3)));
+                    + (decode(s.charAt(i + 1)) << 12)
+                    + (decode(s.charAt(i + 2)) << 6)
+                    + (decode(s.charAt(i + 3)));
 
             bos.write((tri >> 16) & 255);
             if (s.charAt(i + 2) == '=') {

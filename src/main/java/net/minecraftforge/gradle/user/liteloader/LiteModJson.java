@@ -30,8 +30,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LiteModJson
-{
+public class LiteModJson {
+    private transient final Project project;
+    private transient final String minecraftVersion;
     public String name, displayName, version, author;
     public String mcversion, revision;
     public String injectAt, tweakClass;
@@ -39,104 +40,85 @@ public class LiteModJson
     public List<String> dependsOn;
     public List<String> requiredAPIs;
     public List<String> mixinConfigs;
-    
-    private transient final Project project;
-    private transient final String minecraftVersion;
-    
-    LiteModJson(Project project, String minecraftVersion, String revision)
-    {
+
+    LiteModJson(Project project, String minecraftVersion, String revision) {
         this.project = project;
         this.mcversion = this.minecraftVersion = minecraftVersion;
         this.revision = revision;
-        
+
         this.name = project.getName();
         this.displayName = project.hasProperty("displayName") ? project.property("displayName").toString() : project.getDescription();
         this.version = project.getVersion().toString();
     }
-    
-    public void setMcversion(String version)
-    {
+
+    public void setMcversion(String version) {
         this.mcversion = version;
     }
-    
-    public void setRevision(String revision)
-    {
+
+    public void setRevision(String revision) {
         this.revision = revision;
     }
-    
-    public List<String> getClassTransformerClasses()
-    {
-        if (this.classTransformerClasses == null)
-        {
+
+    public List<String> getClassTransformerClasses() {
+        if (this.classTransformerClasses == null) {
             this.classTransformerClasses = new ArrayList<String>();
         }
         return this.classTransformerClasses;
     }
-    
-    public List<String> getDependsOn()
-    {
-        if (this.dependsOn == null)
-        {
+
+    public List<String> getDependsOn() {
+        if (this.dependsOn == null) {
             this.dependsOn = new ArrayList<String>();
         }
         return this.dependsOn;
     }
-    
-    public List<String> getRequiredAPIs()
-    {
-        if (this.requiredAPIs == null)
-        {
+
+    public List<String> getRequiredAPIs() {
+        if (this.requiredAPIs == null) {
             this.requiredAPIs = new ArrayList<String>();
         }
         return this.requiredAPIs;
     }
-    
-    public List<String> getMixinConfigs()
-    {
-        if (this.mixinConfigs == null)
-        {
+
+    public List<String> getMixinConfigs() {
+        if (this.mixinConfigs == null) {
             this.mixinConfigs = new ArrayList<String>();
         }
         return this.mixinConfigs;
     }
 
-    public void toJsonFile(File outputFile) throws IOException
-    {
+    public void toJsonFile(File outputFile) throws IOException {
         this.validate();
-        
+
         FileWriter writer = new FileWriter(outputFile);
         new GsonBuilder().setPrettyPrinting().create().toJson(this, writer);
         writer.flush();
         writer.close();
     }
 
-    private void validate()
-    {
+    private void validate() {
         if (Strings.isNullOrEmpty(this.name))
             throw new InvalidUserDataException("litemod json is missing property [name]");
-        
+
         if (Strings.isNullOrEmpty(this.version))
             throw new InvalidUserDataException("litemod json is missing property [version]");
-        
+
         if (Strings.isNullOrEmpty(this.mcversion))
             throw new InvalidUserDataException("litemod json is missing property [mcversion]");
-        
+
         if (Strings.isNullOrEmpty(this.revision))
             throw new InvalidUserDataException("litemod json is missing property [revision]");
-        
-        try
-        {
+
+        try {
             Float.parseFloat(this.revision);
-        }
-        catch (NumberFormatException ex)
-        {
+        } catch (NumberFormatException ex) {
             throw new InvalidUserDataException("invalid format for [revision] property in litemod.json, expected float");
         }
-        
+
         if (!this.minecraftVersion.equals(this.mcversion)) {
             this.project.getLogger().warn("You are setting a different target version of minecraft to the build environment");
         }
 
     }
-    
+
 }

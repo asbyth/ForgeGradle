@@ -19,8 +19,7 @@
  */
 package net.minecraftforge.gradle.util.json.version;
 
-public class Download
-{
+public class Download {
     String sha1, url;
     int size;
 }

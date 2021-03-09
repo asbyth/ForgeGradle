@@ -29,15 +29,12 @@ import net.minecraftforge.gradle.util.json.version.ManifestVersion;
 import java.lang.reflect.Type;
 import java.util.Map;
 
-public class MojangManifestAdapter implements JsonDeserializer<Map<String, ManifestVersion>>
-{
+public class MojangManifestAdapter implements JsonDeserializer<Map<String, ManifestVersion>> {
     @Override
-    public Map<String, ManifestVersion> deserialize(JsonElement json, Type type, JsonDeserializationContext context) throws JsonParseException
-    {
+    public Map<String, ManifestVersion> deserialize(JsonElement json, Type type, JsonDeserializationContext context) throws JsonParseException {
         Map<String, ManifestVersion> out = Maps.newHashMap();
 
-        for (JsonElement element : json.getAsJsonObject().get("versions").getAsJsonArray())
-        {
+        for (JsonElement element : json.getAsJsonObject().get("versions").getAsJsonArray()) {
             ManifestVersion version = context.deserialize(element, ManifestVersion.class);
             out.put(version.id, version);
         }

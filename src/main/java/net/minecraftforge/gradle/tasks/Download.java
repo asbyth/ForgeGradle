@@ -39,8 +39,7 @@ import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
 
-public class Download extends CachedTask
-{
+public class Download extends CachedTask {
     @Input
     private Object url;
 
@@ -49,8 +48,7 @@ public class Download extends CachedTask
     private Object output;
 
     @TaskAction
-    public void doTask() throws IOException
-    {
+    public void doTask() throws IOException {
         File outputFile = getProject().file(getOutput());
         outputFile.getParentFile().mkdirs();
         outputFile.createNewFile();
@@ -61,8 +59,8 @@ public class Download extends CachedTask
         connect.setRequestProperty("User-Agent", Constants.USER_AGENT);
         connect.setInstanceFollowRedirects(true);
 
-        ReadableByteChannel  inChannel  = Channels.newChannel(connect.getInputStream());
-        FileChannel          outChannel = new FileOutputStream(outputFile).getChannel();
+        ReadableByteChannel inChannel = Channels.newChannel(connect.getInputStream());
+        FileChannel outChannel = new FileOutputStream(outputFile).getChannel();
 
         // If length is longer than what is available, it copies what is available according to java docs.
         // Therefore, I use Long.MAX_VALUE which is a theoretical maximum.
@@ -74,23 +72,19 @@ public class Download extends CachedTask
         getLogger().info("Download complete");
     }
 
-    public File getOutput()
-    {
+    public File getOutput() {
         return getProject().file(output);
     }
 
-    public void setOutput(Object output)
-    {
+    public void setOutput(Object output) {
         this.output = output;
     }
 
-    public String getUrl()
-    {
+    public String getUrl() {
         return Constants.resolveString(url);
     }
 
-    public void setUrl(Object url)
-    {
+    public void setUrl(Object url) {
         this.url = url;
     }
 }

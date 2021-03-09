@@ -24,16 +24,14 @@ import net.minecraftforge.gradle.common.Constants;
 /**
  * Preset mappings for Notch and Searge names.
  */
-public enum ReobfMappingType
-{
+public enum ReobfMappingType {
     SEARGE(Constants.SRG_MCP_TO_SRG),
     NOTCH(Constants.SRG_MCP_TO_NOTCH),
     CUSTOM(null);
 
-    private String path;
+    private final String path;
 
-    private ReobfMappingType(String s)
-    {
+    ReobfMappingType(String s) {
         this.path = s;
     }
 
@@ -42,8 +40,7 @@ public enum ReobfMappingType
      *
      * @return The delayed path
      */
-    public String getPath()
-    {
+    public String getPath() {
         return path;
     }
 }

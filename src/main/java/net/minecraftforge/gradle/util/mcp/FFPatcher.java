@@ -19,19 +19,16 @@
  */
 package net.minecraftforge.gradle.util.mcp;
 
-import java.util.Arrays;
-import java.util.List;
-
-import net.minecraftforge.gradle.common.Constants;
-
 import com.google.code.regexp.Matcher;
 import com.google.code.regexp.Pattern;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
+import net.minecraftforge.gradle.common.Constants;
 
-public class FFPatcher
-{
+import java.util.Arrays;
+import java.util.List;
+
+public class FFPatcher {
     static final String MODIFIERS = "public|protected|private|static|abstract|final|native|synchronized|transient|volatile|strictfp";
 
     private static final Pattern SYNTHETICS = Pattern.compile("(?m)(\\s*// \\$FF: (synthetic|bridge) method(\\r\\n|\\n|\\r)){1,2}\\s*(?<modifiers>(?:(?:" + MODIFIERS + ") )*)(?<return>.+?) (?<method>.+?)\\((?<arguments>.*)\\)\\s*\\{(\\r\\n|\\n|\\r)\\s*return this\\.(?<method2>.+?)\\((?<arguments2>.*)\\);(\\r\\n|\\n|\\r)\\s*\\}");
@@ -57,8 +54,7 @@ public class FFPatcher
     private static final String CONSTRUCTOR_CALL_REGEX = "(?<name>this|super)\\((?<body>.*?)\\)(?<end>;)";
     private static final String VALUE_FIELD_REGEX = "private static final %s\\[\\] [$\\w\\d]+ = new %s\\[\\]\\{.*?\\};";
 
-    public static String processFile(String text)
-    {
+    public static String processFile(String text) {
         StringBuffer out = new StringBuffer();
 //        Matcher m = SYNTHETICS.matcher(text);
 //        while(m.find())
@@ -101,37 +97,31 @@ public class FFPatcher
 //        return out.toString();
     }
 
-    private static int processClass(List<String> lines, String indent, int startIndex, String qualifiedName, String simpleName)
-    {
+    private static int processClass(List<String> lines, String indent, int startIndex, String qualifiedName, String simpleName) {
         Pattern classPattern = Pattern.compile(indent + CLASS_REGEX);
 
-        for (int i = startIndex; i < lines.size(); i++)
-        {
+        for (int i = startIndex; i < lines.size(); i++) {
             String line = lines.get(i);
 
             // who knows.....
             if (Strings.isNullOrEmpty(line))
                 continue;
-            // ignore packages and imports
+                // ignore packages and imports
             else if (line.startsWith("package") || line.startsWith("import"))
                 continue;
 
             Matcher matcher = classPattern.matcher(line);
 
             // found a class!
-            if (matcher.find())
-            {
+            if (matcher.find()) {
                 String newIndent;
                 String classPath;
-                if (Strings.isNullOrEmpty(qualifiedName))
-                {
+                if (Strings.isNullOrEmpty(qualifiedName)) {
                     classPath = matcher.group("name");
                     newIndent = indent;
-                }
-                else
-                {
+                } else {
                     classPath = qualifiedName + "." + matcher.group("name");
-                    newIndent = indent+ "   ";
+                    newIndent = indent + "   ";
                 }
 
 //                // fund an enum class, parse it seperately
@@ -139,7 +129,7 @@ public class FFPatcher
 //                    processEnum(lines, newIndent, i+1, classPath, matcher.group("name"));
 
                 // nested class searching
-                i = processClass(lines, newIndent, i+1, classPath, matcher.group("name"));
+                i = processClass(lines, newIndent, i + 1, classPath, matcher.group("name"));
             }
 
             // class has finished
@@ -150,8 +140,7 @@ public class FFPatcher
         return 0;
     }
 
-    private static void processEnum(List<String> lines, String indent, int startIndex, String qualifiedName, String simpleName)
-    {
+    private static void processEnum(List<String> lines, String indent, int startIndex, String qualifiedName, String simpleName) {
         String newIndent = indent + "   ";
         Pattern enumEntry = Pattern.compile("^" + newIndent + ENUM_ENTRY_REGEX);
         Pattern constructor = Pattern.compile("^" + newIndent + String.format(CONSTRUCTOR_REGEX, simpleName));
@@ -161,27 +150,22 @@ public class FFPatcher
         String newLine;
         boolean prevSynthetic = false;
 
-        for (int i = startIndex; i < lines.size(); i++)
-        {
+        for (int i = startIndex; i < lines.size(); i++) {
             newLine = null;
             String line = lines.get(i);
 
             // find and replace enum entries
             Matcher matcher = enumEntry.matcher(line);
-            if (matcher.find())
-            {
+            if (matcher.find()) {
                 String body = matcher.group("body");
 
                 newLine = newIndent + matcher.group("name");
 
-                if (!Strings.isNullOrEmpty(body))
-                {
+                if (!Strings.isNullOrEmpty(body)) {
                     String[] args = body.split(", ");
 
-                    if (line.endsWith("{"))
-                    {
-                        if (args[args.length - 1].equals("null"))
-                        {
+                    if (line.endsWith("{")) {
+                        if (args[args.length - 1].equals("null")) {
                             args = Arrays.copyOf(args, args.length - 1);
                         }
                     }
@@ -196,13 +180,12 @@ public class FFPatcher
 
             // find and replace constructor
             matcher = constructor.matcher(line);
-            if (matcher.find())
-            {
+            if (matcher.find()) {
                 StringBuilder tmp = new StringBuilder();
                 tmp.append(newIndent).append(matcher.group("modifiers")).append(simpleName).append("(");
 
                 String[] args = matcher.group("parameters").split(", ");
-                for(int x = 2; x < args.length; x++)
+                for (int x = 2; x < args.length; x++)
                     tmp.append(args[x]).append(x < args.length - 1 ? ", " : "");
                 tmp.append(")");
 
@@ -215,12 +198,10 @@ public class FFPatcher
 
             // find constructor calls...
             matcher = constructorCall.matcher(line);
-            if (matcher.find())
-            {
+            if (matcher.find()) {
                 String body = matcher.group("body");
 
-                if (!Strings.isNullOrEmpty(body))
-                {
+                if (!Strings.isNullOrEmpty(body)) {
                     String[] args = body.split(", ");
                     args = Arrays.copyOfRange(args, 2, args.length);
                     body = Joiner.on(", ").join(args);
@@ -229,19 +210,16 @@ public class FFPatcher
                 newLine = newIndent + "   " + matcher.group("name") + "(" + body + ")" + matcher.group("end");
             }
 
-            if (prevSynthetic)
-            {
+            if (prevSynthetic) {
                 matcher = valueField.matcher(line);
                 if (matcher.find())
                     newLine = "";
             }
 
-            if (line.contains("// $FF: synthetic field"))
-            {
+            if (line.contains("// $FF: synthetic field")) {
                 newLine = "";
                 prevSynthetic = true;
-            }
-            else
+            } else
                 prevSynthetic = false;
 
             if (newLine != null)
@@ -253,8 +231,7 @@ public class FFPatcher
         }
     }
 
-    private static String synthetic_replacement(Matcher match)
-    {
+    private static String synthetic_replacement(Matcher match) {
         //This is designed to remove all the synthetic/bridge methods that the compiler will just generate again
         //First off this only works on methods that bounce to methods that are named exactly alike.
         if (!match.group("method").equals(match.group("method2")))
@@ -287,8 +264,7 @@ public class FFPatcher
         return match.group();
     }
 
-    private static String abstract_replacement(Matcher match)
-    {
+    private static String abstract_replacement(Matcher match) {
         String orig = match.group("arguments");
         String number = match.group("number");
 
@@ -297,8 +273,7 @@ public class FFPatcher
 
         String[] args = orig.split(", ");
         StringBuilder fixed = new StringBuilder();
-        for (int x = 0; x < args.length; x++)
-        {
+        for (int x = 0; x < args.length; x++) {
             String[] p = args[x].split(" ");
             if (p.length == 3) //varargs
             {

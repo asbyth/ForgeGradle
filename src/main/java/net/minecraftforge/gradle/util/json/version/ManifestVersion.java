@@ -19,7 +19,6 @@
  */
 package net.minecraftforge.gradle.util.json.version;
 
-public class ManifestVersion
-{
+public class ManifestVersion {
     public String id, type, time, releaseTime, url;
 }

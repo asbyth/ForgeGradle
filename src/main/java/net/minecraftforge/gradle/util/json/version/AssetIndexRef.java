@@ -19,8 +19,7 @@
  */
 package net.minecraftforge.gradle.util.json.version;
 
-public class AssetIndexRef
-{
+public class AssetIndexRef {
     public String id, sha1, url;
     public int size, totalSize;
 }

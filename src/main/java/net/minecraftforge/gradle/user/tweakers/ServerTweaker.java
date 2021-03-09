@@ -26,11 +26,9 @@ import java.util.List;
 
 import static net.minecraftforge.gradle.common.Constants.*;
 
-public class ServerTweaker extends TweakerPlugin
-{
+public class ServerTweaker extends TweakerPlugin {
     @Override
-    protected void applyVanillaUserPlugin()
-    {
+    protected void applyVanillaUserPlugin() {
         super.applyVanillaUserPlugin();
 
         // remove client deps
@@ -41,26 +39,22 @@ public class ServerTweaker extends TweakerPlugin
     }
 
     @Override
-    protected String getJarName()
-    {
+    protected String getJarName() {
         return "minecraft_server";
     }
 
     @Override
-    protected void createDecompTasks(String globalPattern, String localPattern)
-    {
+    protected void createDecompTasks(String globalPattern, String localPattern) {
         super.makeDecompTasks(globalPattern, localPattern, delayedFile(JAR_SERVER_PURE), TASK_SPLIT_SERVER, delayedFile(MCP_PATCHES_SERVER));
     }
 
     @Override
-    protected boolean hasServerRun()
-    {
+    protected boolean hasServerRun() {
         return true;
     }
 
     @Override
-    protected boolean hasClientRun()
-    {
+    protected boolean hasClientRun() {
         return false;
     }
 }

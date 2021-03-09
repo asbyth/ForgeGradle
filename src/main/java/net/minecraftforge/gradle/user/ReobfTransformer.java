@@ -21,8 +21,7 @@ package net.minecraftforge.gradle.user;
 
 import java.io.Serializable;
 
-public interface ReobfTransformer extends Serializable
-{
+public interface ReobfTransformer extends Serializable {
 
     /**
      * Called for each class to be reobfuscated
@@ -30,8 +29,7 @@ public interface ReobfTransformer extends Serializable
      * <em>Don't use {@link org.objectweb.asm.ClassReader#EXPAND_FRAMES EXPAND_FRAMES}</em>
      *
      * @param data The class bytes
-     *
      * @return The modified class bytes
      */
-    public abstract byte[] transform(byte[] data);
+    byte[] transform(byte[] data);
 }

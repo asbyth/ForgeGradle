@@ -19,39 +19,39 @@
  */
 package net.minecraftforge.gradle.user.patcherUser.forge;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.gradle.api.logging.Logger;
-import org.gradle.api.logging.Logging;
-
-import com.google.common.base.Strings;
-
 import net.minecraftforge.gradle.common.Constants;
 import net.minecraftforge.gradle.user.UserBaseExtension;
 import net.minecraftforge.gradle.user.UserBasePlugin;
-import net.minecraftforge.gradle.util.GradleConfigurationException;
+import org.gradle.api.logging.Logger;
+import org.gradle.api.logging.Logging;
 
-public class ForgeExtension extends UserBaseExtension
-{
-    private String         forgeVersion;
-    private String         coreMod = null;
+import java.util.regex.Pattern;
 
-    public ForgeExtension(UserBasePlugin<ForgeExtension> plugin)
-    {
+public class ForgeExtension extends UserBaseExtension {
+    private static final String JUST_MC = "(\\d+\\.\\d+(?:\\.\\d+)?[_pre\\d]*)";
+    private static final String JUST_API = "((?:\\d+\\.){3}(\\d+))((?:-[\\w\\.]+)?)";
+    private static final Pattern API = Pattern.compile(JUST_API);
+    private static final Pattern STANDARD = Pattern.compile(JUST_MC + "-" + JUST_API);
+    private static final Logger LOGGER = Logging.getLogger(ForgeExtension.class);
+    private String forgeVersion;
+
+    // ----------------------------------------
+    // Code to check the forge version and stuff
+    // ----------------------------------------
+    private String coreMod = null;
+
+    public ForgeExtension(UserBasePlugin<ForgeExtension> plugin) {
         super(plugin);
     }
 
     /**
      * @return the MinecraftForge version
      */
-    public String getForgeVersion()
-    {
+    public String getForgeVersion() {
         return forgeVersion;
     }
 
-    public void setForgeVersion(String forgeVersion)
-    {
+    public void setForgeVersion(String forgeVersion) {
         checkAndSetVersion(forgeVersion);
 
         replacer.putReplacement(Constants.REPLACE_MC_VERSION, version);
@@ -71,12 +71,10 @@ public class ForgeExtension extends UserBaseExtension
      * </ul>
      *
      * @param inVersion The version
-     *
      * @see <a href="http://files.minecraftforge.net">http://files.minecraftforge.net</a>
      */
     @Override
-    public void setVersion(String inVersion)
-    {
+    public void setVersion(String inVersion) {
         checkAndSetVersion(inVersion);
 
         replacer.putReplacement(Constants.REPLACE_MC_VERSION, version);
@@ -87,18 +85,7 @@ public class ForgeExtension extends UserBaseExtension
         checkMappings();
     }
 
-    // ----------------------------------------
-    // Code to check the forge version and stuff
-    // ----------------------------------------
-
-    private static final String  JUST_MC  = "(\\d+\\.\\d+(?:\\.\\d+)?[_pre\\d]*)";
-    private static final String  JUST_API = "((?:\\d+\\.){3}(\\d+))((?:-[\\w\\.]+)?)";
-    private static final Pattern API      = Pattern.compile(JUST_API);
-    private static final Pattern STANDARD = Pattern.compile(JUST_MC + "-" + JUST_API);
-    private static final Logger  LOGGER   = Logging.getLogger(ForgeExtension.class);
-
-    private void checkAndSetVersion(String str)
-    {
+    private void checkAndSetVersion(String str) {
         str = str.trim();
         int idx = str.indexOf('-');
         if (idx == -1)
@@ -157,13 +144,13 @@ public class ForgeExtension extends UserBaseExtension
          *     This was just used to verify the version existed. This can be done via maven-metadata.xml
          */
     }
+
     /**
      * Get the coremod class for the mod
      *
      * @return The coremod class, or {@code null} if none is configured
      */
-    public String getCoreMod()
-    {
+    public String getCoreMod() {
         return coreMod;
     }
 
@@ -172,8 +159,7 @@ public class ForgeExtension extends UserBaseExtension
      *
      * @param coreMod The FQN for the coremod
      */
-    public void setCoreMod(String coreMod)
-    {
+    public void setCoreMod(String coreMod) {
         this.coreMod = coreMod;
     }
 }

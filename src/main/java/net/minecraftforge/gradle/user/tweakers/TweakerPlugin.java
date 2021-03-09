@@ -19,34 +19,28 @@
  */
 package net.minecraftforge.gradle.user.tweakers;
 
-import java.util.List;
-
+import com.google.common.base.Strings;
+import net.minecraftforge.gradle.common.Constants;
 import net.minecraftforge.gradle.user.UserVanillaBasePlugin;
+import net.minecraftforge.gradle.util.GradleConfigurationException;
 import org.gradle.api.tasks.bundling.Jar;
 
-import com.google.common.base.Strings;
+import java.util.List;
 
-import net.minecraftforge.gradle.common.Constants;
-import net.minecraftforge.gradle.util.GradleConfigurationException;
-
-public abstract class TweakerPlugin extends UserVanillaBasePlugin<TweakerExtension>
-{
+public abstract class TweakerPlugin extends UserVanillaBasePlugin<TweakerExtension> {
     @Override
-    protected void applyVanillaUserPlugin()
-    {
+    protected void applyVanillaUserPlugin() {
         // add launchwrapper dep.. cuz everyone uses it apperantly..
         project.getDependencies().add(Constants.CONFIG_MC_DEPS, "net.minecraft:launchwrapper:1.11");
     }
 
     @Override
-    protected void afterEvaluate()
-    {
+    protected void afterEvaluate() {
         super.afterEvaluate();
 
         TweakerExtension ext = getExtension();
 
-        if (Strings.isNullOrEmpty(ext.getTweakClass()))
-        {
+        if (Strings.isNullOrEmpty(ext.getTweakClass())) {
             throw new GradleConfigurationException("You must set the tweak class of your tweaker!");
         }
 
@@ -56,26 +50,22 @@ public abstract class TweakerPlugin extends UserVanillaBasePlugin<TweakerExtensi
     }
 
     @Override
-    protected String getClientTweaker(TweakerExtension ext)
-    {
+    protected String getClientTweaker(TweakerExtension ext) {
         return "";// nothing, put it in as an argument
     }
 
     @Override
-    protected String getServerTweaker(TweakerExtension ext)
-    {
+    protected String getServerTweaker(TweakerExtension ext) {
         return "";// nothing, put it in as an argument
     }
 
     @Override
-    protected String getClientRunClass(TweakerExtension ext)
-    {
+    protected String getClientRunClass(TweakerExtension ext) {
         return ext.getMainClass();
     }
 
     @Override
-    protected List<String> getClientRunArgs(TweakerExtension ext)
-    {
+    protected List<String> getClientRunArgs(TweakerExtension ext) {
         List<String> out = super.getClientRunArgs(ext);
         out.add("--tweakClass");
         out.add(ext.getTweakClass());
@@ -83,14 +73,12 @@ public abstract class TweakerPlugin extends UserVanillaBasePlugin<TweakerExtensi
     }
 
     @Override
-    protected String getServerRunClass(TweakerExtension ext)
-    {
+    protected String getServerRunClass(TweakerExtension ext) {
         return ext.getMainClass();
     }
 
     @Override
-    protected List<String> getServerRunArgs(TweakerExtension ext)
-    {
+    protected List<String> getServerRunArgs(TweakerExtension ext) {
         List<String> out = super.getServerRunArgs(ext);
         out.add("--tweakClass");
         out.add(ext.getTweakClass());
@@ -98,14 +86,12 @@ public abstract class TweakerPlugin extends UserVanillaBasePlugin<TweakerExtensi
     }
 
     @Override
-    protected List<String> getClientJvmArgs(TweakerExtension ext)
-    {
+    protected List<String> getClientJvmArgs(TweakerExtension ext) {
         return ext.getResolvedClientJvmArgs();
     }
 
     @Override
-    protected List<String> getServerJvmArgs(TweakerExtension ext)
-    {
+    protected List<String> getServerJvmArgs(TweakerExtension ext) {
         return ext.getResolvedServerJvmArgs();
     }
 }

@@ -25,12 +25,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 
  * @author abrarsyed
- *
+ * <p>
  * This annotation is used to mark outputs that should be cached.
  * This is only effective if used with a CacheContainer and an ICachableTask
  */
-@Target( { ElementType.FIELD, ElementType.METHOD })
+@Target({ElementType.FIELD, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Cached { }
+public @interface Cached {
+}

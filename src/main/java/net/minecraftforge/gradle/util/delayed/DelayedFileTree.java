@@ -19,62 +19,51 @@
  */
 package net.minecraftforge.gradle.util.delayed;
 
-import java.io.File;
-
 import org.gradle.api.Project;
 import org.gradle.api.file.FileTree;
 
+import java.io.File;
+
 @SuppressWarnings("serial")
-public class DelayedFileTree extends DelayedBase<FileTree>
-{
+public class DelayedFileTree extends DelayedBase<FileTree> {
     protected final File hardcoded;
     protected transient final Project project;
-    
-    public DelayedFileTree(Class<?> owner, File file)
-    {
-        super(owner, (TokenReplacer)null);
+
+    public DelayedFileTree(Class<?> owner, File file) {
+        super(owner, null);
         hardcoded = file;
         project = null;
     }
-    
-    public DelayedFileTree(Class<?> owner, Project project, ReplacementProvider provider, String pattern)
-    {
+
+    public DelayedFileTree(Class<?> owner, Project project, ReplacementProvider provider, String pattern) {
         super(owner, provider, pattern);
         hardcoded = null;
         this.project = project;
     }
-    
-    public DelayedFileTree(Class<?> owner, Project project, TokenReplacer replacer)
-    {
+
+    public DelayedFileTree(Class<?> owner, Project project, TokenReplacer replacer) {
         super(owner, replacer);
         hardcoded = null;
         this.project = project;
-        
+
     }
 
     @Override
-    public FileTree resolveDelayed(String replaced)
-    {
+    public FileTree resolveDelayed(String replaced) {
         String name;
         File file;
-        
-        if (hardcoded != null)
-        {
+
+        if (hardcoded != null) {
             name = hardcoded.getName();
             file = hardcoded;
-        }
-        else
-        {
+        } else {
             name = replaced;
             file = project.file(replaced);
         }
-        
-        if (name.endsWith(".jar") || name.endsWith(".zip"))
-        {
+
+        if (name.endsWith(".jar") || name.endsWith(".zip")) {
             return project.zipTree(file);
-        }
-        else
-        {
+        } else {
             return project.fileTree(file);
         }
     }

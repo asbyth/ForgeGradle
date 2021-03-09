@@ -19,17 +19,6 @@
  */
 package net.minecraftforge.gradle.user.patcherUser.forge;
 
-import static net.minecraftforge.gradle.common.Constants.REPLACE_MC_VERSION;
-import static net.minecraftforge.gradle.user.UserConstants.TASK_REOBF;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.List;
-
-import org.gradle.api.Action;
-import org.gradle.api.tasks.bundling.Jar;
-
 import com.google.common.base.Strings;
 import net.minecraftforge.gradle.common.Constants;
 import net.minecraftforge.gradle.tasks.CreateStartTask;
@@ -41,13 +30,21 @@ import net.minecraftforge.gradle.user.patcherUser.PatcherUserBasePlugin;
 import net.minecraftforge.gradle.util.GradleConfigurationException;
 import net.minecraftforge.gradle.util.json.fgversion.FGVersion;
 import net.minecraftforge.gradle.util.json.fgversion.FGVersionWrapper;
+import org.gradle.api.Action;
+import org.gradle.api.tasks.bundling.Jar;
 
-public class ForgePlugin extends PatcherUserBasePlugin<ForgeExtension>
-{
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.List;
+
+import static net.minecraftforge.gradle.common.Constants.REPLACE_MC_VERSION;
+import static net.minecraftforge.gradle.user.UserConstants.TASK_REOBF;
+
+public class ForgePlugin extends PatcherUserBasePlugin<ForgeExtension> {
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    protected void applyUserPlugin()
-    {
+    protected void applyUserPlugin() {
         super.applyUserPlugin();
 
         // setup reobf
@@ -58,9 +55,8 @@ public class ForgePlugin extends PatcherUserBasePlugin<ForgeExtension>
 
         // add coremod loading hack to gradle start
         {
-            CreateStartTask makeStart = ((CreateStartTask)project.getTasks().getByName(UserConstants.TASK_MAKE_START));
-            for (String res : Constants.GRADLE_START_FML_RES)
-            {
+            CreateStartTask makeStart = ((CreateStartTask) project.getTasks().getByName(UserConstants.TASK_MAKE_START));
+            for (String res : Constants.GRADLE_START_FML_RES) {
                 makeStart.addResource(res);
             }
             makeStart.addExtraLine("net.minecraftforge.gradle.GradleForgeHacks.searchCoremods(this);");
@@ -70,8 +66,7 @@ public class ForgePlugin extends PatcherUserBasePlugin<ForgeExtension>
         project.getTasks().getByName("eclipse").doLast(new Action() {
 
             @Override
-            public void execute(Object arg0)
-            {
+            public void execute(Object arg0) {
                 // find the file
                 File f = new File("eclipse/.metadata/.plugins/org.eclipse.core.resources/.projects");
 
@@ -89,10 +84,9 @@ public class ForgePlugin extends PatcherUserBasePlugin<ForgeExtension>
                 if (f.exists()) // if .location exists
                 {
                     String projectDir = "URI//" + project.getProjectDir().toURI().toString();
-                    try
-                    {
-                        byte[] LOCATION_BEFORE = new byte[] { 0x40, (byte) 0xB1, (byte) 0x8B, (byte) 0x81, 0x23, (byte) 0xBC, 0x00, 0x14, 0x1A, 0x25, (byte) 0x96, (byte) 0xE7, (byte) 0xA3, (byte) 0x93, (byte) 0xBE, 0x1E };
-                        byte[] LOCATION_AFTER = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, (byte) 0xC0, 0x58, (byte) 0xFB, (byte) 0xF3, 0x23, (byte) 0xBC, 0x00, 0x14, 0x1A, 0x51, (byte) 0xF3, (byte) 0x8C, 0x7B, (byte) 0xBB, 0x77, (byte) 0xC6 };
+                    try {
+                        byte[] LOCATION_BEFORE = new byte[]{0x40, (byte) 0xB1, (byte) 0x8B, (byte) 0x81, 0x23, (byte) 0xBC, 0x00, 0x14, 0x1A, 0x25, (byte) 0x96, (byte) 0xE7, (byte) 0xA3, (byte) 0x93, (byte) 0xBE, 0x1E};
+                        byte[] LOCATION_AFTER = new byte[]{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, (byte) 0xC0, 0x58, (byte) 0xFB, (byte) 0xF3, 0x23, (byte) 0xBC, 0x00, 0x14, 0x1A, 0x51, (byte) 0xF3, (byte) 0x8C, 0x7B, (byte) 0xBB, 0x77, (byte) 0xC6};
 
                         FileOutputStream fos = new FileOutputStream(f);
                         fos.write(LOCATION_BEFORE);//Unknown but w/e
@@ -101,9 +95,7 @@ public class ForgePlugin extends PatcherUserBasePlugin<ForgeExtension>
                         fos.write(projectDir.getBytes());
                         fos.write(LOCATION_AFTER);//Unknown but w/e
                         fos.close();
-                    }
-                    catch (IOException e)
-                    {
+                    } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
@@ -112,18 +104,15 @@ public class ForgePlugin extends PatcherUserBasePlugin<ForgeExtension>
     }
 
     @Override
-    protected void setupReobf(ReobfTaskWrapper reobf)
-    {
+    protected void setupReobf(ReobfTaskWrapper reobf) {
         super.setupReobf(reobf);
         reobf.setMappingType(ReobfMappingType.SEARGE);
     }
 
     @Override
-    protected void afterEvaluate()
-    {
+    protected void afterEvaluate() {
         ForgeExtension ext = getExtension();
-        if (Strings.isNullOrEmpty(ext.getForgeVersion()))
-        {
+        if (Strings.isNullOrEmpty(ext.getForgeVersion())) {
             throw new GradleConfigurationException("You must set the Forge version!");
         }
 
@@ -133,16 +122,14 @@ public class ForgePlugin extends PatcherUserBasePlugin<ForgeExtension>
         {
             Jar jarTask = (Jar) project.getTasks().getByName("jar");
 
-            if (!Strings.isNullOrEmpty(ext.getCoreMod()))
-            {
+            if (!Strings.isNullOrEmpty(ext.getCoreMod())) {
                 jarTask.getManifest().getAttributes().put("FMLCorePlugin", ext.getCoreMod());
             }
         }
     }
 
     @Override
-    protected void onVersionCheck(FGVersion version, FGVersionWrapper wrapper)
-    {
+    protected void onVersionCheck(FGVersion version, FGVersionWrapper wrapper) {
         String forgeVersion = getExtension().getForgeVersion();
 
         // isolate build number
@@ -158,94 +145,79 @@ public class ForgePlugin extends PatcherUserBasePlugin<ForgeExtension>
         int maxBuild = version.ext.get("forgeMaxBuild").getAsInt();
 
         if (buildNum < minBuild)
-            throw new GradleConfigurationException("This version of ForgeGradle ("+getExtension().forgeGradleVersion+") does not support forge builds less than #"+minBuild);
+            throw new GradleConfigurationException("This version of ForgeGradle (" + getExtension().forgeGradleVersion + ") does not support forge builds less than #" + minBuild);
         else if (buildNum > maxBuild)
-            throw new GradleConfigurationException("This version of ForgeGradle ("+getExtension().forgeGradleVersion+") does not support forge builds greater than #"+maxBuild);
+            throw new GradleConfigurationException("This version of ForgeGradle (" + getExtension().forgeGradleVersion + ") does not support forge builds greater than #" + maxBuild);
     }
 
     @Override
-    public String getApiGroup(ForgeExtension ext)
-    {
+    public String getApiGroup(ForgeExtension ext) {
         return "net.minecraftforge";
     }
 
     @Override
-    public String getApiName(ForgeExtension ext)
-    {
+    public String getApiName(ForgeExtension ext) {
         return "forge";
     }
 
     @Override
-    public String getApiVersion(ForgeExtension ext)
-    {
+    public String getApiVersion(ForgeExtension ext) {
         return ext.getVersion() + "-" + ext.getForgeVersion();
     }
 
     @Override
-    public String getUserdevClassifier(ForgeExtension ext)
-    {
+    public String getUserdevClassifier(ForgeExtension ext) {
         return "userdev";
     }
 
     @Override
-    public String getUserdevExtension(ForgeExtension ext)
-    {
+    public String getUserdevExtension(ForgeExtension ext) {
         return "jar";
     }
 
     @Override
-    protected String getClientTweaker(ForgeExtension ext)
-    {
+    protected String getClientTweaker(ForgeExtension ext) {
         return getApiGroup(ext) + ".fml.common.launcher.FMLTweaker";
     }
 
     @Override
-    protected String getServerTweaker(ForgeExtension ext)
-    {
+    protected String getServerTweaker(ForgeExtension ext) {
         return getApiGroup(ext) + ".fml.common.launcher.FMLServerTweaker";
     }
 
     @Override
-    protected String getClientRunClass(ForgeExtension ext)
-    {
+    protected String getClientRunClass(ForgeExtension ext) {
         return "net.minecraft.launchwrapper.Launch";
     }
 
     @Override
-    protected List<String> getClientRunArgs(ForgeExtension ext)
-    {
+    protected List<String> getClientRunArgs(ForgeExtension ext) {
         return ext.getResolvedClientRunArgs();
     }
 
     @Override
-    protected String getServerRunClass(ForgeExtension ext)
-    {
+    protected String getServerRunClass(ForgeExtension ext) {
         return getClientRunClass(ext);
     }
 
     @Override
-    protected List<String> getServerRunArgs(ForgeExtension ext)
-    {
+    protected List<String> getServerRunArgs(ForgeExtension ext) {
         return ext.getResolvedServerRunArgs();
     }
 
     @Override
-    protected List<String> getClientJvmArgs(ForgeExtension ext)
-    {
+    protected List<String> getClientJvmArgs(ForgeExtension ext) {
         List<String> out = ext.getResolvedClientJvmArgs();
-        if (!Strings.isNullOrEmpty(ext.getCoreMod()))
-        {
+        if (!Strings.isNullOrEmpty(ext.getCoreMod())) {
             out.add("-Dfml.coreMods.load=" + ext.getCoreMod());
         }
         return out;
     }
 
     @Override
-    protected List<String> getServerJvmArgs(ForgeExtension ext)
-    {
+    protected List<String> getServerJvmArgs(ForgeExtension ext) {
         List<String> out = ext.getResolvedServerJvmArgs();
-        if (!Strings.isNullOrEmpty(ext.getCoreMod()))
-        {
+        if (!Strings.isNullOrEmpty(ext.getCoreMod())) {
             out.add("-Dfml.coreMods.load=" + ext.getCoreMod());
         }
         return out;

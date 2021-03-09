@@ -19,9 +19,11 @@
  */
 package net.minecraftforge.gradle.user;
 
-import java.io.File;
-import java.util.List;
-
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import groovy.lang.Closure;
+import net.minecraftforge.gradle.common.Constants;
+import net.minecraftforge.gradle.util.GradleConfigurationException;
 import org.gradle.api.Action;
 import org.gradle.api.NamedDomainObjectFactory;
 import org.gradle.api.Project;
@@ -29,26 +31,19 @@ import org.gradle.api.Task;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.tasks.bundling.Jar;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
+import java.io.File;
+import java.util.List;
 
-import groovy.lang.Closure;
-import net.minecraftforge.gradle.common.Constants;
-import net.minecraftforge.gradle.util.GradleConfigurationException;
-
-public class ReobfTaskFactory implements NamedDomainObjectFactory<IReobfuscator>
-{
+public class ReobfTaskFactory implements NamedDomainObjectFactory<IReobfuscator> {
     private final UserBasePlugin<?> plugin;
 
-    public ReobfTaskFactory(UserBasePlugin<?> plugin)
-    {
+    public ReobfTaskFactory(UserBasePlugin<?> plugin) {
         this.plugin = plugin;
     }
 
     @SuppressWarnings("serial")
     @Override
-    public IReobfuscator create(final String jarName)
-    {
+    public IReobfuscator create(final String jarName) {
         String name = "reobf" + Character.toUpperCase(jarName.charAt(0)) + jarName.substring(1);
         final TaskSingleReobf task = plugin.maybeMakeTask(name, TaskSingleReobf.class);
 
@@ -56,9 +51,8 @@ public class ReobfTaskFactory implements NamedDomainObjectFactory<IReobfuscator>
         task.mustRunAfter("test");
 
         task.setJar(new Closure<File>(ReobfTaskFactory.class) {
-            public File call()
-            {
-                return ((Jar) plugin.project.getTasks().getByName(jarName)).getArchivePath();
+            public File call() {
+                return ((Jar) plugin.project.getTasks().getByName(jarName)).getArchiveFile().get().getAsFile();
             }
         });
 
@@ -70,11 +64,9 @@ public class ReobfTaskFactory implements NamedDomainObjectFactory<IReobfuscator>
         // do after-Evaluate resolution, for the same of good error reporting
         plugin.project.afterEvaluate(new Action<Project>() {
             @Override
-            public void execute(Project arg0)
-            {
+            public void execute(Project arg0) {
                 Task jar = plugin.project.getTasks().getByName(jarName);
-                if (!(jar instanceof Jar))
-                {
+                if (!(jar instanceof Jar)) {
                     throw new GradleConfigurationException(jarName + "  is not a jar task. Can only reobf jars!");
                 }
             }
@@ -83,20 +75,17 @@ public class ReobfTaskFactory implements NamedDomainObjectFactory<IReobfuscator>
         return wrapper;
     }
 
-    public class ReobfTaskWrapper implements IReobfuscator
-    {
+    public class ReobfTaskWrapper implements IReobfuscator {
         private final String name;
         private final TaskSingleReobf reobf;
         private ReobfMappingType mappingType;
 
-        public ReobfTaskWrapper(String name, TaskSingleReobf reobf)
-        {
+        public ReobfTaskWrapper(String name, TaskSingleReobf reobf) {
             this.name = name;
             this.reobf = reobf;
         }
 
-        public String getName()
-        {
+        public String getName() {
             return name;
         }
 
@@ -106,37 +95,36 @@ public class ReobfTaskFactory implements NamedDomainObjectFactory<IReobfuscator>
          *
          * @return The task
          */
-        public TaskSingleReobf getTask()
-        {
+        public TaskSingleReobf getTask() {
             return reobf;
         }
 
         @Override
-        public boolean equals(Object obj)
-        {
-            if (obj instanceof ReobfTaskWrapper)
-            {
+        public boolean equals(Object obj) {
+            if (obj instanceof ReobfTaskWrapper) {
                 return name.equals(((ReobfTaskWrapper) obj).name);
             }
             return false;
         }
 
         @Override
-        public File getMappings()
-        {
+        public File getMappings() {
             return reobf.getPrimarySrg();
         }
 
         @Override
-        public void setMappings(Object srg)
-        {
+        public void setMappings(Object srg) {
             mappingType = ReobfMappingType.CUSTOM;
             reobf.setPrimarySrg(srg);
         }
 
         @Override
-        public void setMappingType(ReobfMappingType type)
-        {
+        public ReobfMappingType getMappingType() {
+            return this.mappingType;
+        }
+
+        @Override
+        public void setMappingType(ReobfMappingType type) {
             Preconditions.checkNotNull(type, "Mapping type cannot be null. Use setMappings() to use custom mappings.");
             Preconditions.checkArgument(type != ReobfMappingType.CUSTOM,
                     "Cannot set a Custom mapping type. Use setMappings() instead.");
@@ -145,100 +133,78 @@ public class ReobfTaskFactory implements NamedDomainObjectFactory<IReobfuscator>
         }
 
         @Override
-        public ReobfMappingType getMappingType()
-        {
-            return this.mappingType;
-        }
-
-        @Override
-        public void setClasspath(FileCollection classpath)
-        {
-            reobf.setClasspath(classpath);
-        }
-
-        @Override
-        public FileCollection getClasspath()
-        {
+        public FileCollection getClasspath() {
             return reobf.getClasspath();
         }
 
         @Override
-        public void setExtraLines(List<Object> extra)
-        {
-            reobf.getExtraSrgLines().clear();
-            extraLines(extra);
+        public void setClasspath(FileCollection classpath) {
+            reobf.setClasspath(classpath);
         }
 
         @Override
-        public List<Object> getExtraLines()
-        {
+        public List<Object> getExtraLines() {
             List<Object> list = Lists.newArrayList();
             list.addAll(reobf.getExtraSrgLines());
             return list;
         }
 
         @Override
-        public void extraLines(Iterable<Object> o)
-        {
-            for (Object obj : o)
-            {
+        public void setExtraLines(List<Object> extra) {
+            reobf.getExtraSrgLines().clear();
+            extraLines(extra);
+        }
+
+        @Override
+        public void extraLines(Iterable<Object> o) {
+            for (Object obj : o) {
                 reobf.addExtraSrgLine(Constants.resolveString(obj));
             }
         }
 
         @Override
-        public void extraLines(Object... o)
-        {
-            for (Object obj : o)
-            {
+        public void extraLines(Object... o) {
+            for (Object obj : o) {
                 reobf.addExtraSrgLine(Constants.resolveString(obj));
             }
         }
 
         @Override
-        public List<Object> getExtraFiles()
-        {
+        public List<Object> getExtraFiles() {
             List<Object> list = Lists.newArrayList();
             list.addAll(reobf.getSecondarySrgFiles().getFiles());
             return list;
         }
 
         @Override
-        public void extraFiles(Iterable<Object> o)
-        {
-            for (Object obj : o)
-            {
+        public void extraFiles(Iterable<Object> o) {
+            for (Object obj : o) {
                 reobf.addSecondarySrgFile(obj);
             }
         }
 
         @Override
-        public void extraFiles(Object... o)
-        {
-            for (Object obj : o)
-            {
+        public void extraFiles(Object... o) {
+            for (Object obj : o) {
                 reobf.addSecondarySrgFile(obj);
             }
         }
 
         @Deprecated
         @Override
-        public void useSrgSrg()
-        {
+        public void useSrgSrg() {
             setMappingType(ReobfMappingType.SEARGE);
             warnDeprecation("useSrgSrg()", "mappingType");
         }
 
         @Deprecated
         @Override
-        public void useNotchSrg()
-        {
+        public void useNotchSrg() {
             setMappingType(ReobfMappingType.NOTCH);
             warnDeprecation("useNotchSrg()", "mappingType");
         }
 
-        private void warnDeprecation(String old, String new_)
-        {
+        private void warnDeprecation(String old, String new_) {
             plugin.project.getLogger().warn("Warning, {} is deprecated! You should use {} instead.", old, new_);
         }
     }
