@@ -19,20 +19,17 @@
  */
 package net.minecraftforge.gradle.common;
 
+import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.io.Resources;
+import net.minecraftforge.gradle.util.GradleConfigurationException;
+import net.minecraftforge.gradle.util.delayed.ReplacementProvider;
+import org.gradle.api.Project;
+
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import org.gradle.api.Project;
-
-import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.io.Resources;
-
-import gnu.trove.TIntObjectHashMap;
-import net.minecraftforge.gradle.util.GradleConfigurationException;
-import net.minecraftforge.gradle.util.delayed.ReplacementProvider;
 
 public abstract class BaseExtension
 {
@@ -196,6 +193,9 @@ public abstract class BaseExtension
      */
     public void setMappings(String mappings)
     {
+        for (Object value : project.getConvention().getPlugins().values()) {
+            System.out.println(value.getClass().getName());
+        }
         if (Strings.isNullOrEmpty(mappings))
         {
             mappingsChannel = null;
