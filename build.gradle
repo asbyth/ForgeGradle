@@ -294,7 +294,7 @@ publishing {
 
                 developers {
                     developer {
-                        id = 'Lighter'
+                        id = 'foregradle'
                         name = 'MinecraftForge'
                     }
                 }
