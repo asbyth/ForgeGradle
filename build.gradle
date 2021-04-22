@@ -27,7 +27,7 @@ repositories {
     mavenLocal()
     maven {
         name = "forge"
-        url = "https://files.minecraftforge.net/maven"
+        url = "https://maven.minecraftforge.net/"
     }
     jcenter() // get as many deps from here as possible
     mavenCentral()
@@ -50,6 +50,15 @@ configurations {
     deployerJars
     shade
     compileOnly.extendsFrom shade
+}
+
+// Required because Srg2Source depends on a snapshot of JDT that is no longer published on forge maven
+configurations.all {
+    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+        if (details.requested.group == 'org.eclipse.jdt' && details.requested.name == 'org.eclipse.jdt.core') {
+            details.useVersion '3.10.0'
+        }
+    }
 }
 
 dependencies {
