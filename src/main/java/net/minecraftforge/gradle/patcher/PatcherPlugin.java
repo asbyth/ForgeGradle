@@ -584,22 +584,22 @@ public class PatcherPlugin extends BasePlugin<PatcherExtension> {
     }
 
     protected void removeProject(PatcherProject patcher) {
-        project.getTasks().remove(project.getTasks().getByName(projectString(TASK_PROJECT_REMAP_JAR, patcher)));
-        project.getTasks().remove(project.getTasks().getByName(projectString(TASK_PROJECT_EXTRACT_SRC, patcher)));
-        project.getTasks().remove(project.getTasks().getByName(projectString(TASK_PROJECT_EXTRACT_RES, patcher)));
-        project.getTasks().remove(project.getTasks().getByName(projectString(TASK_PROJECT_MAKE_START, patcher)));
-        project.getTasks().remove(project.getTasks().getByName(projectString(TASK_PROJECT_RUNE_CLIENT, patcher)));
-        project.getTasks().remove(project.getTasks().getByName(projectString(TASK_PROJECT_RUNE_SERVER, patcher)));
-        project.getTasks().remove(project.getTasks().getByName(projectString(TASK_PROJECT_RUNJ_CLIENT, patcher)));
-        project.getTasks().remove(project.getTasks().getByName(projectString(TASK_PROJECT_RUNJ_SERVER, patcher)));
+        ArrayList<String> tasksToDisable = Lists.newArrayList(TASK_PROJECT_REMAP_JAR, TASK_PROJECT_EXTRACT_SRC,
+                TASK_PROJECT_EXTRACT_RES, TASK_PROJECT_MAKE_START, TASK_PROJECT_RUNE_CLIENT, TASK_PROJECT_RUNE_SERVER,
+                TASK_PROJECT_RUNJ_CLIENT, TASK_PROJECT_RUNJ_SERVER);
+
+        for (String task : tasksToDisable) {
+            project.getTasks().getByName(projectString(task, patcher)).setEnabled(false);
+        }
 
         ((TaskGenSubprojects) project.getTasks().getByName(TASK_GEN_PROJECTS)).removeProject(patcher.getCapName());
 
-        project.getTasks().remove(project.getTasks().getByName(projectString(TASK_PROJECT_COMPILE, patcher)));
-        project.getTasks().remove(project.getTasks().getByName(projectString(TASK_PROJECT_GEN_EXC, patcher)));
-        project.getTasks().remove(project.getTasks().getByName(projectString(TASK_PROJECT_RANGEMAP, patcher)));
-        project.getTasks().remove(project.getTasks().getByName(projectString(TASK_PROJECT_RETROMAP, patcher)));
-        project.getTasks().remove(project.getTasks().getByName(projectString(TASK_PROJECT_RETRO_NONMC, patcher)));
+        tasksToDisable = Lists.newArrayList(TASK_PROJECT_COMPILE, TASK_PROJECT_COMPILE, TASK_PROJECT_GEN_EXC,
+                TASK_PROJECT_RANGEMAP, TASK_PROJECT_RETROMAP, TASK_PROJECT_RETRO_NONMC);
+
+        for (String task : tasksToDisable) {
+            project.getTasks().getByName(projectString(task, patcher)).setEnabled(false);
+        }
     }
 
     public void afterEvaluate() {
