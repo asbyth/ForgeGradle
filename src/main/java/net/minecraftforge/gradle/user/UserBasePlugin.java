@@ -37,19 +37,20 @@ import org.gradle.api.artifacts.maven.Conf2ScopeMappingContainer;
 import org.gradle.api.artifacts.result.*;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.internal.plugins.DslObject;
-import org.gradle.api.plugins.*;
+import org.gradle.api.plugins.JavaPlugin;
+import org.gradle.api.plugins.JavaPluginConvention;
 import org.gradle.api.plugins.MavenPluginConvention;
 import org.gradle.api.specs.Spec;
 import org.gradle.api.tasks.GroovySourceSet;
 import org.gradle.api.tasks.JavaExec;
 import org.gradle.api.tasks.ScalaSourceSet;
 import org.gradle.api.tasks.SourceSet;
-import org.gradle.api.tasks.bundling.Jar;
 import org.gradle.api.tasks.compile.GroovyCompile;
 import org.gradle.api.tasks.compile.JavaCompile;
 import org.gradle.api.tasks.javadoc.Javadoc;
 import org.gradle.api.tasks.scala.ScalaCompile;
 import org.gradle.jvm.JvmLibrary;
+import org.gradle.jvm.tasks.Jar;
 import org.gradle.language.base.artifact.SourcesArtifact;
 import org.gradle.plugins.ide.eclipse.model.EclipseModel;
 import org.gradle.plugins.ide.idea.model.IdeaModel;
@@ -716,7 +717,10 @@ public abstract class UserBasePlugin<T extends UserBaseExtension> extends BasePl
         final Jar sourceJar = makeTask(TASK_SRC_JAR, Jar.class);
         final String retromappedSrc = getSourceSetFormatted(main, TMPL_RETROMAPED_RPL);
         sourceJar.from(main.getOutput().getResourcesDir());
-        sourceJar.getArchiveClassifier().set("sources");
+        if (sourceJar.hasProperty("archiveClassifier")) {
+            sourceJar.setProperty("archiveClassifier", "sources");
+            System.out.println(sourceJar.property("archiveClassifier"));
+        }
         sourceJar.dependsOn(main.getCompileJavaTaskName(), main.getProcessResourcesTaskName(), getSourceSetFormatted(main, TMPL_TASK_RETROMAP_RPL));
 
         sourceJar.from(new Closure<Object>(UserBasePlugin.class) {

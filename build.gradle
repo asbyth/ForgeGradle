@@ -1,21 +1,11 @@
-buildscript {
-    repositories {
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-    }
-    dependencies {
-        classpath "com.gradle.publish:plugin-publish-plugin:0.9.1"
-        classpath 'nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0'
-    }
+plugins {
+    id "java"
+    id "idea"
+    id "maven"
+    id "com.gradle.plugin-publish" version "0.14.0"
+    id "com.github.hierynomus.license" version "0.15.0"
+    id 'maven-publish'
 }
-
-apply plugin: 'java'
-apply plugin: 'idea'
-apply plugin: 'maven'
-apply plugin: "com.gradle.plugin-publish"
-apply plugin: 'maven-publish'
-apply plugin: 'license'
 
 group = 'net.minecraftforge.gradle'
 version = '2.1-gradlefixes'
@@ -146,9 +136,9 @@ javadoc {
     classpath += configurations.compileOnly
 
     // linked javadoc urls.. why not...
-    options.addStringOption 'link', 'https://gradle.org/docs/current/javadoc/'
-    options.addStringOption 'link', 'http://docs.guava-libraries.googlecode.com/git-history/v18.0/javadoc'
-    options.addStringOption 'link', 'http://asm.ow2.org/asm50/javadoc/user/'
+    options.addStringOption 'link', 'https://gradle.org/docs/6.8.3/javadoc/'
+    options.addStringOption 'link', 'https://guava.dev/releases/18.0/api/docs/'
+    options.addStringOption 'link', 'https://javadoc.io/doc/org.ow2.asm/asm/5.0.3/index.html'
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
@@ -180,13 +170,11 @@ license {
     ])
     ignoreFailures false
     strictCheck true
-    mapping {
-        java = 'SLASHSTAR_STYLE'
-    }
+    mapping('java', 'SLASHSTAR_STYLE')
 }
 
 pluginBundle {
-    website = 'http://www.gradle.org/'
+    website = 'https://www.gradle.org/'
     vcsUrl = 'https://github.com/MinecraftForge/ForgeGradle'
     description = 'Gradle plugin for all Minecraft mod development needs'
     tags = ['forge', 'minecraft', 'minecraftforge', 'sponge', 'mcp']
@@ -236,40 +224,40 @@ uploadArchives {
             version = project.version
             artifactId = project.archivesBaseName
             project {
-                name project.archivesBaseName
-                packaging 'jar'
-                description 'Gradle plugin for Forge'
-                url 'https://github.com/MinecraftForge/ForgeGradle'
+                name = project.archivesBaseName
+                packaging = 'jar'
+                description = 'Gradle plugin for Forge'
+                url = 'https://github.com/MinecraftForge/ForgeGradle'
 
                 scm {
-                    url 'https://github.com/MinecraftForge/ForgeGradle'
-                    connection 'scm:git:git://github.com/MinecraftForge/ForgeGradle.git'
-                    developerConnection 'scm:git:git@github.com:MinecraftForge/ForgeGradle.git'
+                    url = 'https://github.com/MinecraftForge/ForgeGradle'
+                    connection = 'scm:git:git://github.com/MinecraftForge/ForgeGradle.git'
+                    developerConnection = 'scm:git:git@github.com:MinecraftForge/ForgeGradle.git'
                 }
 
                 issueManagement {
-                    system 'github'
-                    url 'https://github.com/MinecraftForge/ForgeGradle/issues'
+                    system = 'github'
+                    url = 'https://github.com/MinecraftForge/ForgeGradle/issues'
                 }
 
                 licenses {
                     license {
-                        name 'Lesser GNU Public License, Version 2.1'
-                        url 'https://www.gnu.org/licenses/lgpl-2.1.html'
-                        distribution 'repo'
+                        name = 'Lesser GNU Public License, Version 2.1'
+                        url = 'https://www.gnu.org/licenses/lgpl-2.1.html'
+                        distribution = 'repo'
                     }
                 }
 
                 developers {
                     developer {
-                        id 'AbrarSyed'
-                        name 'Abrar Syed'
-                        roles { role 'developer' }
+                        id = 'AbrarSyed'
+                        name = 'Abrar Syed'
+                        roles {'developer'}
                     }
                     developer {
-                        id 'LexManos'
-                        name 'Lex Manos'
-                        roles { role 'developer' }
+                        id = 'LexManos'
+                        name = 'Lex Manos'
+                        roles {'developer'}
                     }
                 }
             }
@@ -295,6 +283,7 @@ publishing {
     }
 
     publications {
+        //noinspection GroovyAssignabilityCheck
         mavenJava(MavenPublication) {
             from components.java
             pom {
