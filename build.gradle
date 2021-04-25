@@ -1,8 +1,9 @@
 plugins {
     id "java"
     id "idea"
+    id "maven-publish"
     id "com.gradle.plugin-publish" version "0.14.0"
-    id "com.github.hierynomus.license" version "0.15.0"
+//    id "com.github.hierynomus.license" version "0.15.0"
 }
 
 group = 'net.minecraftforge.gradle'
@@ -111,6 +112,8 @@ processResources {
     from(sourceSets.main.resources.srcDirs) {
         exclude 'forgegradle.version.txt'
     }
+
+    duplicatesStrategy DuplicatesStrategy.EXCLUDE
 }
 
 jar {
@@ -127,6 +130,8 @@ jar {
         attributes 'group': project.group
         attributes 'Implementation-Version': project.version + getGitHash()
     }
+
+    duplicatesStrategy DuplicatesStrategy.EXCLUDE
 }
 
 javadoc {
@@ -151,24 +156,24 @@ test {
         exclude "**/ExtensionMcpMappingTest*"
 }
 
-license {
-    ext {
-        description = 'A Gradle plugin for the creation of Minecraft mods and MinecraftForge plugins.'
-        year = '2021'
-        fullname = 'MinecraftForge'
-    }
-    header rootProject.file('HEADER')
-    include '**net/minecraftforge/gradle/**/*.java'
-    excludes([
-            '**net/minecraftforge/gradle/util/ZipFileTree.java',
-            '**net/minecraftforge/gradle/util/json/version/*',
-            '**net/minecraftforge/gradle/util/patching/Base64.java',
-            '**net/minecraftforge/gradle/util/patching/ContextualPatch.java'
-    ])
-    ignoreFailures false
-    strictCheck true
-    mapping('java', 'SLASHSTAR_STYLE')
-}
+//license {
+//    ext {
+//        description = 'A Gradle plugin for the creation of Minecraft mods and MinecraftForge plugins.'
+//        year = '2021'
+//        fullname = 'MinecraftForge'
+//    }
+//    header rootProject.file('HEADER')
+//    include '**net/minecraftforge/gradle/**/*.java'
+//    excludes([
+//            '**net/minecraftforge/gradle/util/ZipFileTree.java',
+//            '**net/minecraftforge/gradle/util/json/version/*',
+//            '**net/minecraftforge/gradle/util/patching/Base64.java',
+//            '**net/minecraftforge/gradle/util/patching/ContextualPatch.java'
+//    ])
+//    ignoreFailures false
+//    strictCheck true
+//    mapping('java', 'SLASHSTAR_STYLE')
+//}
 
 pluginBundle {
     website = 'https://github.com/asbyth/ForgeGradle'
@@ -209,4 +214,30 @@ static def getGitHash() {
     def process = 'git rev-parse --short HEAD'.execute()
     process.waitFor()
     return '-' + (process.exitValue() ? 'unknown' : process.text.trim())
+}
+
+publishing {
+    repositories {
+        maven {
+            url = "$buildDir/repository"
+        }
+    }
+
+    publications {
+        //noinspection GroovyAssignabilityCheck
+        mavenJava(MavenPublication) {
+            from components.java
+            pom {
+                name = 'ForgeGradle'
+                url = 'https://github.com/asbyth/ForgeGradle'
+
+                developers {
+                    developer {
+                        id = 'forgegradle'
+                        name = 'asbyth'
+                    }
+                }
+            }
+        }
+    }
 }
