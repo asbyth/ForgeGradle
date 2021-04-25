@@ -54,10 +54,7 @@ import org.gradle.jvm.tasks.Jar;
 import org.gradle.language.base.artifact.SourcesArtifact;
 import org.gradle.plugins.ide.eclipse.model.EclipseModel;
 import org.gradle.plugins.ide.idea.model.IdeaModel;
-import org.w3c.dom.DOMException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
+import org.w3c.dom.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -717,10 +714,7 @@ public abstract class UserBasePlugin<T extends UserBaseExtension> extends BasePl
         final Jar sourceJar = makeTask(TASK_SRC_JAR, Jar.class);
         final String retromappedSrc = getSourceSetFormatted(main, TMPL_RETROMAPED_RPL);
         sourceJar.from(main.getOutput().getResourcesDir());
-        if (sourceJar.hasProperty("archiveClassifier")) {
-            sourceJar.setProperty("archiveClassifier", "sources");
-            System.out.println(sourceJar.property("archiveClassifier"));
-        }
+        sourceJar.setProperty("archiveClassifier", "sources");
         sourceJar.dependsOn(main.getCompileJavaTaskName(), main.getProcessResourcesTaskName(), getSourceSetFormatted(main, TMPL_TASK_RETROMAP_RPL));
 
         sourceJar.from(new Closure<Object>(UserBasePlugin.class) {
@@ -1087,6 +1081,12 @@ public abstract class UserBasePlugin<T extends UserBaseExtension> extends BasePl
             }
         }
 
+        if (root == null) {
+            Node projectNode = doc.getElementsByTagName("project").item(0);
+            if (projectNode == null) throw new NullPointerException("Project node null. Maybe it is missing?");
+            root = addXml(projectNode, "component", ImmutableMap.of("name", "RunManager"));
+        }
+
         T ext = getExtension();
 
         String[][] config = new String[][]
@@ -1132,7 +1132,8 @@ public abstract class UserBasePlugin<T extends UserBaseExtension> extends BasePl
             addXml(child, "option", ImmutableMap.of("name", "ENABLE_SWING_INSPECTOR", "value", "false"));
             addXml(child, "option", ImmutableMap.of("name", "ENV_VARIABLES"));
             addXml(child, "option", ImmutableMap.of("name", "PASS_PARENT_ENVS", "value", "true"));
-            addXml(child, "module", ImmutableMap.of("name", ((IdeaModel) project.getExtensions().getByName("idea")).getModule().getName()));
+            // Probably a better way to do this but this should work in most situations.
+            addXml(child, "module", ImmutableMap.of("name", ((IdeaModel) project.getExtensions().getByName("idea")).getModule().getName() + ".main"));
             addXml(child, "RunnerSettings", ImmutableMap.of("RunnerId", "Run"));
             addXml(child, "ConfigurationWrapper", ImmutableMap.of("RunnerId", "Run"));
         }
