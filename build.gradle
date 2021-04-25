@@ -1,17 +1,14 @@
 plugins {
     id "java"
     id "idea"
-    id "maven"
     id "com.gradle.plugin-publish" version "0.14.0"
     id "com.github.hierynomus.license" version "0.15.0"
-    id 'maven-publish'
 }
 
 group = 'net.minecraftforge.gradle'
-version = '2.1-gradlefixes'
+version = '2.1'
 archivesBaseName = 'ForgeGradle'
-targetCompatibility = '1.8'
-sourceCompatibility = '1.8'
+targetCompatibility = sourceCompatibility = 1.8
 
 repositories {
     mavenLocal()
@@ -136,7 +133,7 @@ javadoc {
     classpath += configurations.compileOnly
 
     // linked javadoc urls.. why not...
-    options.addStringOption 'link', 'https://gradle.org/docs/6.8.3/javadoc/'
+    options.addStringOption 'link', 'https://gradle.org/docs/7.0.0/javadoc/'
     options.addStringOption 'link', 'https://guava.dev/releases/18.0/api/docs/'
     options.addStringOption 'link', 'https://javadoc.io/doc/org.ow2.asm/asm/5.0.3/index.html'
 }
@@ -157,8 +154,8 @@ test {
 license {
     ext {
         description = 'A Gradle plugin for the creation of Minecraft mods and MinecraftForge plugins.'
-        year = '2013'
-        fullname = 'Minecraft Forge'
+        year = '2021'
+        fullname = 'MinecraftForge'
     }
     header rootProject.file('HEADER')
     include '**net/minecraftforge/gradle/**/*.java'
@@ -174,8 +171,8 @@ license {
 }
 
 pluginBundle {
-    website = 'https://www.gradle.org/'
-    vcsUrl = 'https://github.com/MinecraftForge/ForgeGradle'
+    website = 'https://github.com/asbyth/ForgeGradle'
+    vcsUrl = 'https://github.com/asbyth/ForgeGradle'
     description = 'Gradle plugin for all Minecraft mod development needs'
     tags = ['forge', 'minecraft', 'minecraftforge', 'sponge', 'mcp']
 
@@ -204,67 +201,6 @@ pluginBundle {
     }
 }
 
-uploadArchives {
-    repositories.mavenDeployer {
-
-        dependsOn 'build'
-
-        if (project.hasProperty('forgeMavenPass')) {
-            repository(url: "https://files.minecraftforge.net/maven/manage/upload") {
-                authentication(userName: "forge", password: project.getProperty('forgeMavenPass'))
-            }
-        } else {
-            // local repo folder. Might wanna juset use  gradle install   if you wanans end it to maven-local
-            repository(url: 'file://localhost/' + project.file('repo').getAbsolutePath())
-        }
-
-
-        pom {
-            groupId = project.group
-            version = project.version
-            artifactId = project.archivesBaseName
-            project {
-                name = project.archivesBaseName
-                packaging = 'jar'
-                description = 'Gradle plugin for Forge'
-                url = 'https://github.com/MinecraftForge/ForgeGradle'
-
-                scm {
-                    url = 'https://github.com/MinecraftForge/ForgeGradle'
-                    connection = 'scm:git:git://github.com/MinecraftForge/ForgeGradle.git'
-                    developerConnection = 'scm:git:git@github.com:MinecraftForge/ForgeGradle.git'
-                }
-
-                issueManagement {
-                    system = 'github'
-                    url = 'https://github.com/MinecraftForge/ForgeGradle/issues'
-                }
-
-                licenses {
-                    license {
-                        name = 'Lesser GNU Public License, Version 2.1'
-                        url = 'https://www.gnu.org/licenses/lgpl-2.1.html'
-                        distribution = 'repo'
-                    }
-                }
-
-                developers {
-                    developer {
-                        id = 'AbrarSyed'
-                        name = 'Abrar Syed'
-                        roles {'developer'}
-                    }
-                    developer {
-                        id = 'LexManos'
-                        name = 'Lex Manos'
-                        roles {'developer'}
-                    }
-                }
-            }
-        }
-    }
-}
-
 // write out version so its convenient for doc deployment
 file('build').mkdirs()
 file('build/version.txt').text = version
@@ -273,30 +209,4 @@ static def getGitHash() {
     def process = 'git rev-parse --short HEAD'.execute()
     process.waitFor()
     return '-' + (process.exitValue() ? 'unknown' : process.text.trim())
-}
-
-publishing {
-    repositories {
-        maven {
-            url = "$buildDir/repository"
-        }
-    }
-
-    publications {
-        //noinspection GroovyAssignabilityCheck
-        mavenJava(MavenPublication) {
-            from components.java
-            pom {
-                name = 'ForgeGradle'
-                url = 'https://github.com/asbyth/ForgeGradle'
-
-                developers {
-                    developer {
-                        id = 'foregradle'
-                        name = 'MinecraftForge'
-                    }
-                }
-            }
-        }
-    }
 }
