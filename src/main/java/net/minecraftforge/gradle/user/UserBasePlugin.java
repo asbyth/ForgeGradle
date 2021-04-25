@@ -33,13 +33,11 @@ import net.minecraftforge.gradle.util.delayed.DelayedFile;
 import org.gradle.api.*;
 import org.gradle.api.artifacts.*;
 import org.gradle.api.artifacts.component.ComponentIdentifier;
-import org.gradle.api.artifacts.maven.Conf2ScopeMappingContainer;
 import org.gradle.api.artifacts.result.*;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.internal.plugins.DslObject;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.plugins.JavaPluginConvention;
-import org.gradle.api.plugins.MavenPluginConvention;
 import org.gradle.api.specs.Spec;
 import org.gradle.api.tasks.GroovySourceSet;
 import org.gradle.api.tasks.JavaExec;
@@ -160,9 +158,6 @@ public abstract class UserBasePlugin<T extends UserBaseExtension> extends BasePl
         replacer.putReplacement(REPLACE_SERVER_TWEAKER, getServerTweaker(ext));
         replacer.putReplacement(REPLACE_CLIENT_MAIN, getClientRunClass(ext));
         replacer.putReplacement(REPLACE_SERVER_MAIN, getServerRunClass(ext));
-
-        // map configurations (only if the maven or maven publish plugins exist)
-        mapConfigurations();
 
         // configure source replacement.
         project.getTasks().withType(TaskSourceCopy.class, t -> {
@@ -781,20 +776,6 @@ public abstract class UserBasePlugin<T extends UserBaseExtension> extends BasePl
         project.getDependencies().add(config, col);
 
         return dummyTask;
-    }
-
-    protected void mapConfigurations() {
-        if (project.getPlugins().hasPlugin("maven")) {
-            MavenPluginConvention mavenConv = (MavenPluginConvention) project.getConvention().getPlugins().get("maven");
-            Conf2ScopeMappingContainer mappings = mavenConv.getConf2ScopeMappings();
-            ConfigurationContainer configs = project.getConfigurations();
-            final int priority = 500; // 500 is more than the compile config which is at 300
-
-            mappings.setSkipUnmappedConfs(true); // dont want unmapped confs bieng compile deps..
-            mappings.addMapping(priority, configs.getByName(CONFIG_PROVIDED), "provided");
-            mappings.addMapping(priority, configs.getByName(CONFIG_DEOBF_COMPILE), "compile");
-            mappings.addMapping(priority, configs.getByName(CONFIG_DEOBF_PROVIDED), "provided");
-        }
     }
 
     protected void addAtsToDeobf() {

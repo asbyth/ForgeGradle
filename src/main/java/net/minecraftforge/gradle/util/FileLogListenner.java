@@ -51,16 +51,32 @@ public class FileLogListenner implements StandardOutputListener, BuildListener {
     }
 
     @Override
-    public void projectsLoaded(Gradle arg0) {
-    }
-
-    @Override
     public void onOutput(CharSequence arg0) {
         try {
             writer.write(arg0.toString());
         } catch (IOException e) {
             // to stop recursion....
         }
+    }
+
+    @Override
+    public void beforeSettings(Settings settings) {
+        BuildListener.super.beforeSettings(settings);
+    }
+
+    @Override
+    public void settingsEvaluated(Settings settings) {
+
+    }
+
+    @Override
+    public void projectsLoaded(Gradle gradle) {
+
+    }
+
+    @Override
+    public void projectsEvaluated(Gradle gradle) {
+
     }
 
     @Override
@@ -71,22 +87,4 @@ public class FileLogListenner implements StandardOutputListener, BuildListener {
             e.printStackTrace();
         }
     }
-
-    @Override
-    public void projectsEvaluated(Gradle arg0) {
-    }  // nothing
-
-    @SuppressWarnings("DEPRECATED") // can't fix this
-    @Override
-    public void buildStarted(Gradle gradle) { }
-
-    @Override
-    public void beforeSettings(Settings settings) {
-
-    }
-
-    @Override
-    public void settingsEvaluated(Settings arg0) {
-    } // nothing
-
 }
