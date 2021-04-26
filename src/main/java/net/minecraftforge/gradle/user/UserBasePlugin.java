@@ -196,7 +196,7 @@ public abstract class UserBasePlugin<T extends UserBaseExtension> extends BasePl
 
         if (this.hasClientRun()) {
             JavaExec exec = (JavaExec) project.getTasks().getByName("runClient");
-            exec.classpath(project.getConfigurations().getByName("runtime"));
+            exec.classpath(project.getConfigurations().getByName("runtimeOnly"));
             exec.classpath(project.getConfigurations().getByName(CONFIG_MC));
             exec.classpath(project.getConfigurations().getByName(CONFIG_MC_DEPS));
             exec.classpath(project.getConfigurations().getByName(CONFIG_START));
@@ -208,7 +208,7 @@ public abstract class UserBasePlugin<T extends UserBaseExtension> extends BasePl
 
         if (this.hasServerRun()) {
             JavaExec exec = (JavaExec) project.getTasks().getByName("runServer");
-            exec.classpath(project.getConfigurations().getByName("runtime"));
+            exec.classpath(project.getConfigurations().getByName("runtimeOnly"));
             exec.classpath(project.getConfigurations().getByName(CONFIG_MC));
             exec.classpath(project.getConfigurations().getByName(CONFIG_MC_DEPS));
             exec.classpath(project.getConfigurations().getByName(CONFIG_START));
@@ -455,8 +455,8 @@ public abstract class UserBasePlugin<T extends UserBaseExtension> extends BasePl
 
         project.getConfigurations().getByName(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME).extendsFrom(project.getConfigurations().getByName(CONFIG_DC_RESOLVED));
         project.getConfigurations().getByName(CONFIG_PROVIDED).extendsFrom(project.getConfigurations().getByName(CONFIG_DP_RESOLVED));
-        project.getConfigurations().getByName(api.getImplementationConfigurationName()).extendsFrom(project.getConfigurations().getByName("compile"));
-        project.getConfigurations().getByName(JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME).extendsFrom(project.getConfigurations().getByName("apiCompile"));
+        project.getConfigurations().getByName(api.getImplementationConfigurationName()).extendsFrom(project.getConfigurations().getByName("implementation"));
+        project.getConfigurations().getByName(JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME).extendsFrom(project.getConfigurations().getByName("apiImplementation"));
 
         Javadoc javadoc = (Javadoc) project.getTasks().getByName(JavaPlugin.JAVADOC_TASK_NAME);
         javadoc.setClasspath(main.getOutput().plus(main.getCompileClasspath()));
@@ -540,8 +540,8 @@ public abstract class UserBasePlugin<T extends UserBaseExtension> extends BasePl
     }
 
     protected final void doDevTimeDeobf() {
-        final Task compileDummy = getDummyDep("compile", delayedFile(DIR_DEOBF_DEPS + "/compileDummy.jar"), TASK_DD_COMPILE);
-        final Task providedDummy = getDummyDep("compile", delayedFile(DIR_DEOBF_DEPS + "/providedDummy.jar"), TASK_DD_PROVIDED);
+        final Task compileDummy = getDummyDep("implementation", delayedFile(DIR_DEOBF_DEPS + "/compileDummy.jar"), TASK_DD_COMPILE);
+        final Task providedDummy = getDummyDep("implementation", delayedFile(DIR_DEOBF_DEPS + "/providedDummy.jar"), TASK_DD_PROVIDED);
 
         setupDevTimeDeobf(compileDummy, providedDummy);
     }
@@ -630,7 +630,7 @@ public abstract class UserBasePlugin<T extends UserBaseExtension> extends BasePl
 
     protected void doDepAtExtraction() {
         TaskExtractDepAts extract = makeTask(TASK_EXTRACT_DEP_ATS, TaskExtractDepAts.class);
-        extract.addCollection("compile");
+        extract.addCollection("implementation");
         extract.addCollection(CONFIG_PROVIDED);
         extract.addCollection(CONFIG_DEOBF_COMPILE);
         extract.addCollection(CONFIG_DEOBF_PROVIDED);
