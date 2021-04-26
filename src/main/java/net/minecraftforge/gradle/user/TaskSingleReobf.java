@@ -36,6 +36,7 @@ import net.minecraftforge.gradle.util.mcp.ReobfExceptor;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.tasks.TaskAction;
+import org.objectweb.asm.ClassReader;
 
 import java.io.*;
 import java.net.URLClassLoader;
@@ -151,29 +152,36 @@ public class TaskSingleReobf extends DefaultTask {
         tempIn.deleteOnExit();
         Constants.copyFile(out, tempIn); // copy the to-be-output jar to the temporary input location. because output == input
 
-        // pre-transform
-        List<ReobfTransformer> transformers = getPreTransformers();
-        if (!transformers.isEmpty()) {
-            File transformed = File.createTempFile("preTransformed", ".jar", getTemporaryDir());
-            transformed.deleteOnExit();
-            applyExtraTransformers(tempIn, transformed, transformers);
+        File obfuscated;
+        try {
+            // pre-transform
+            List<ReobfTransformer> transformers = getPreTransformers();
+            if (!transformers.isEmpty()) {
+                File transformed = File.createTempFile("preTransformed", ".jar", getTemporaryDir());
+                transformed.deleteOnExit();
+                applyExtraTransformers(tempIn, transformed, transformers);
 
-            tempIn = transformed; // for later copying
-        }
+                tempIn = transformed; // for later copying
+            }
 
-        // obfuscate
-        File obfuscated = File.createTempFile("obfuscated", ".jar", getTemporaryDir());
-        obfuscated.deleteOnExit();
-        applySpecialSource(tempIn, obfuscated, srg, srgLines, getSecondarySrgFiles());
+            // obfuscate
+            obfuscated = File.createTempFile("obfuscated", ".jar", getTemporaryDir());
+            obfuscated.deleteOnExit();
+            applySpecialSource(tempIn, obfuscated, srg, srgLines, getSecondarySrgFiles());
 
-        // post transform
-        transformers = getPostTransformers();
-        if (!transformers.isEmpty()) {
-            File transformed = File.createTempFile("postTransformed", ".jar", getTemporaryDir());
-            transformed.deleteOnExit();
-            applyExtraTransformers(obfuscated, transformed, transformers);
+            // post transform
+            transformers = getPostTransformers();
+            if (!transformers.isEmpty()) {
+                File transformed = File.createTempFile("postTransformed", ".jar", getTemporaryDir());
+                transformed.deleteOnExit();
+                applyExtraTransformers(obfuscated, transformed, transformers);
 
-            obfuscated = transformed; // for later copying
+                obfuscated = transformed; // for later copying
+            }
+
+        } catch (Exception e) {
+            checkClasses(tempIn);
+            throw new RuntimeException("Unknown error occurred reobfuscating classes", e);
         }
 
         // copy to output
@@ -235,6 +243,34 @@ public class TaskSingleReobf extends DefaultTask {
         out.flush();
         out.close();
         in.close();
+    }
+
+    private void checkClasses(File file) throws IOException {
+        List<String> invalidClasses = new ArrayList<>();
+
+        try (ZipFile in = new ZipFile(file)) {
+            for (ZipEntry entry : Collections.list(in.entries())) {
+                byte[] data = ByteStreams.toByteArray(in.getInputStream(entry));
+
+                if (entry.getName().endsWith(".class")) {
+                    try {
+                        new ClassReader(data);
+                    } catch (Exception e) {
+                        invalidClasses.add(entry.getName());
+                    }
+                }
+            }
+
+        }
+
+        if (!invalidClasses.isEmpty()) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("Failed to reobfuscate the following class(es). You must exclude them for the build to succeed:\n");
+            for (String clazz : invalidClasses) {
+                sb.append("- ").append(clazz).append("\n");
+            }
+            throw new RuntimeException(sb.toString());
+        }
     }
 
     // Main Jar and classpath
