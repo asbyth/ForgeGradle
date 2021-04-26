@@ -17,7 +17,6 @@ repositories {
         name = "forge"
         url = "https://maven.minecraftforge.net/"
     }
-    jcenter() // get as many deps from here as possible
     mavenCentral()
 
     // because SS and its snapshot
