@@ -215,6 +215,10 @@ static def getGitHash() {
     return '-' + (process.exitValue() ? 'unknown' : process.text.trim())
 }
 
+wrapper {
+    distributionType = Wrapper.DistributionType.ALL
+}
+
 publishing {
     repositories {
         maven {
