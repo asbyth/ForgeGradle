@@ -88,7 +88,7 @@ final class PatcherConstants
 
     // top level tasks
     static final String TASK_SETUP               = "setup";
-    static final String TASK_CLEAN               = "clean";
+    static final String TASK_CLEAN               = "cleanForgegradle";
     static final String TASK_GEN_PATCHES         = "genPatches";
     static final String TASK_BUILD               = "build";
 
