@@ -632,6 +632,8 @@ public class PatcherPlugin extends BasePlugin<PatcherExtension> {
         Version version = parseAndStoreVersion(versionJson, versionJson.getParentFile(), delayedFile(Constants.DIR_JSONS).call());
 
         TaskGenSubprojects createProjects = (TaskGenSubprojects) project.getTasks().getByName(TASK_GEN_PROJECTS);
+        createProjects.getInputs().file(versionJson);
+
         Set<String> repos = Sets.newHashSet();
 
         for (Library lib : version.getLibraries()) {
