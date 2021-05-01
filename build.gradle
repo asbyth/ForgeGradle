@@ -31,6 +31,10 @@ repositories {
         name = "mojang"
         url = "https://libraries.minecraft.net/"
     }
+
+    maven {
+        url "https://jitpack.io"
+    }
 }
 
 configurations {
@@ -54,6 +58,12 @@ dependencies {
     // moved to the beginning to be the overrider
     implementation 'org.ow2.asm:asm-debug-all:5.0.3'
     implementation 'com.google.guava:guava:18.0'
+
+    implementation('club.chachy:GitVersion:9d07534ad0') {
+        exclude module: 'org.eclipse.jgit'
+    }
+
+    shade "org.eclipse.jgit:org.eclipse.jgit:5.11.0.202103091610-r"
 
     implementation 'net.sf.opencsv:opencsv:2.3' // reading CSVs.. also used by SpecialSource
     implementation 'com.cloudbees:diff4j:1.1' // for difing and patching

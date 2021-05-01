@@ -151,7 +151,7 @@ public class Constants
     public static final String[] GRADLE_START_RESOURCES = new String[] {
             "GradleStart.java",
             "GradleStartServer.java",
-            "net/minecraftforge/gradle/GradleStartCommon.java",
+            "net/minecraftforge/gradle/GradleStartCommon.java"
 
             // 1.7.10 only
             //makeStart.addResource("net/minecraftforge/gradle/OldPropertyMapSerializer.java");

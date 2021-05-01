@@ -19,6 +19,7 @@
  */
 package net.minecraftforge.gradle.patcher;
 
+import club.chachy.GitVersion;
 import com.google.common.base.Strings;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
@@ -42,6 +43,7 @@ import org.gradle.api.tasks.bundling.Jar;
 import org.gradle.api.tasks.bundling.Zip;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -483,7 +485,7 @@ public class PatcherPlugin extends BasePlugin<PatcherExtension> {
             makeStart.setStartOut(subWorkspace(patcher.getCapName() + DIR_EXTRACTED_START));
             makeStart.setDoesCache(false);
             makeStart.dependsOn(TASK_DL_ASSET_INDEX, TASK_DL_ASSETS);
-            makeStart.getOutputs().upToDateWhen(Constants.CALL_FALSE); //TODO: Abrar, Fix this...
+            makeStart.getOutputs().upToDateWhen(CALL_FALSE); //TODO: Abrar, Fix this...
         }
 
         GenEclipseRunTask eclipseRunClient = makeTask(projectString(TASK_PROJECT_RUNE_CLIENT, patcher), GenEclipseRunTask.class);
@@ -816,6 +818,29 @@ public class PatcherPlugin extends BasePlugin<PatcherExtension> {
         // PACKAGING
 
         PatcherProject patcher = patchersList.get(patchersList.size() - 1);
+
+        CreateStartTask makeProperties = makeTask(projectString(TASK_PROJECT_MAKE_PROPERTIES, patcher), CreateStartTask.class);
+        {
+            makeProperties.addResource("net/minecraftforge/gradle/version/ProjectVersion.java");
+            String propertiesVersion;
+            if (getExtension().isGitVersion()) {
+                propertiesVersion = GitVersion.Companion.invoke(project.getProjectDir());
+            } else {
+                propertiesVersion = project.getVersion().toString();
+            }
+            makeProperties.addReplacement("@@PROJECT_VERSION@@", propertiesVersion);
+            makeProperties.setStartOut(subWorkspace(patcher.getCapName() + DIR_EXTRACTED_START));
+            makeProperties.setDoesCache(false);
+            makeProperties.getOutputs().upToDateWhen(CALL_FALSE); //TODO: Abrar, Fix this...
+        }
+
+        project.afterEvaluate(project1 -> {
+            try {
+                makeProperties.doStuff();
+            } catch (IOException exception) {
+                exception.printStackTrace();
+            }
+        });
 
         TaskReobfuscate reobf = (TaskReobfuscate) project.getTasks().getByName(TASK_REOBFUSCATE);
         reobf.setInJar(delayedFile(projectString(JAR_PROJECT_RECOMPILED, patcher)));

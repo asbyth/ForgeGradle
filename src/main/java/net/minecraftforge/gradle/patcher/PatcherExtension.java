@@ -19,24 +19,21 @@
  */
 package net.minecraftforge.gradle.patcher;
 
-import java.io.File;
-
-import org.gradle.api.NamedDomainObjectContainer;
-
 import groovy.lang.Closure;
 import net.minecraftforge.gradle.common.BaseExtension;
+import org.gradle.api.NamedDomainObjectContainer;
 
-public class PatcherExtension extends BaseExtension
-{
-    private Object                                     versionJson;
-    private Object                                     workspaceDir;
-    private String                                     installerVersion = "null";
+import java.io.File;
+
+public class PatcherExtension extends BaseExtension {
+    private Object versionJson;
+    private Object workspaceDir;
+    private String installerVersion = "null";
     private NamedDomainObjectContainer<PatcherProject> projectContainer;
-    private boolean                                    buildUserdev     = false;
-    private boolean                                    buildInstaller   = false;
+    private boolean buildUserdev = false;
+    private boolean buildInstaller = false;
 
-    public boolean isBuildUserdev()
-    {
+    public boolean isBuildUserdev() {
         return buildUserdev;
     }
 

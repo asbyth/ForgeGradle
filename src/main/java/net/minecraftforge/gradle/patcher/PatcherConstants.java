@@ -132,6 +132,7 @@ final class PatcherConstants
     static final String TASK_PROJECT_EXTRACT_SRC = "extract" + REPLACE_PROJECT_CAP_NAME + "Sources";
     static final String TASK_PROJECT_EXTRACT_RES = "extract" + REPLACE_PROJECT_CAP_NAME + "Resources";
     static final String TASK_PROJECT_MAKE_START  = "make" + REPLACE_PROJECT_CAP_NAME + "Start";
+    static final String TASK_PROJECT_MAKE_PROPERTIES  = "make" + REPLACE_PROJECT_CAP_NAME + "Properties";
     static final String TASK_PROJECT_RUNE_CLIENT = "makeEclipse" + REPLACE_PROJECT_CAP_NAME + "RunClient";
     static final String TASK_PROJECT_RUNE_SERVER = "makeEclipse" + REPLACE_PROJECT_CAP_NAME + "RunServer";
     static final String TASK_PROJECT_RUNJ_CLIENT = "makeIdea" + REPLACE_PROJECT_CAP_NAME + "RunClient";

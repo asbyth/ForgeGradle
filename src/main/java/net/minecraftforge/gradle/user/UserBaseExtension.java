@@ -42,6 +42,7 @@ public class UserBaseExtension extends BaseExtension {
     private List<Object> clientRunArgs = Lists.newArrayList();
     private List<Object> serverJvmArgs = Lists.newArrayList();
     private List<Object> serverRunArgs = Lists.newArrayList();
+    private boolean gitVersion = true;
 
     public UserBaseExtension(UserBasePlugin<? extends UserBaseExtension> plugin) {
         super(plugin);
