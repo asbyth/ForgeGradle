@@ -13,6 +13,7 @@ targetCompatibility = sourceCompatibility = 1.8
 
 repositories {
     mavenLocal()
+    jcenter()
     maven {
         name = "forge"
         url = "https://maven.minecraftforge.net/"
