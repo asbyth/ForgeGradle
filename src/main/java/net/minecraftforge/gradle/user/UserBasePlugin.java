@@ -20,6 +20,7 @@
 package net.minecraftforge.gradle.user;
 
 import club.chachy.GitVersion;
+import club.chachy.data.GitData;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
@@ -320,13 +321,14 @@ public abstract class UserBasePlugin<T extends UserBaseExtension> extends BasePl
         CreateStartTask makeProperties = makeTask(TASK_MAKE_PROPERTIES, CreateStartTask.class);
         {
             makeProperties.addResource("net/minecraftforge/gradle/version/ProjectVersion.java");
-            String version;
+            GitData propertyData;
             if (getExtension().isGitVersion()) {
-                version = GitVersion.Companion.invoke(project.getProjectDir());
+                propertyData = GitVersion.Companion.invoke(project.getProjectDir());
             } else {
-                version = project.getVersion().toString();
+                propertyData = new GitData("unknown", project.getVersion().toString());
             }
-            makeProperties.addReplacement("@@PROJECT_VERSION@@", version);
+            makeProperties.addReplacement("@@PROJECT_VERSION@@", propertyData.getCommit());
+            makeProperties.addReplacement("@@GIT_BRANCH@@", propertyData.getBranch());
             makeProperties.setStartOut(getStartDir());
             makeProperties.setDoesCache(false);
             makeProperties.getOutputs().upToDateWhen(CALL_FALSE); //TODO: Abrar, Fix this...
