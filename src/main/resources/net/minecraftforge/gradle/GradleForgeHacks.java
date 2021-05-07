@@ -84,7 +84,15 @@ public class GradleForgeHacks
         catch (Throwable t)
         {}
 
-        for (URL url : ((URLClassLoader) GradleStartCommon.class.getClassLoader()).getURLs())
+        URL[] urls = new URL[0];
+
+        URL[] classpath = GrossClassloaderHacks.getSystemClassPathURLs();
+
+        if (classpath != null) {
+            urls = classpath;
+        }
+
+        for (URL url : urls)
         {
             if (!url.getProtocol().startsWith("file")) // because file urls start with file://
                 continue; //         this isnt a file
