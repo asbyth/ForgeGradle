@@ -76,8 +76,7 @@ dependencies {
     implementation 'com.github.tony19:named-regexp:0.2.3' // 1.7 Named regexp features
     implementation 'net.minecraftforge:fernflower:2.0-SNAPSHOT' // Fernflower Forge edition
 
-    shade 'net.md-5:SpecialSource:1.7.4' // deobf and reobs
-    // compile 'net.md-5:SpecialSource:1.7.4' // when md5 publishes
+    shade 'com.github.UserTeemu:SpecialSource:1.7.4-SNAPSHOT' // deobf and reobs
 
     // because curse
     implementation 'org.apache.httpcomponents:httpclient:4.3.3'
