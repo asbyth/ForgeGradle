@@ -235,7 +235,7 @@ public class TaskSingleReobf extends DefaultTask {
                         try {
                             data = trans.transform(data);
                         } catch (Exception exception) {
-                            getLogger().warn("Failed to transform class "+e.getName()+" using transformer "+trans.getClass().getName(), exception);
+                            getLogger().warn("Failed to transform class {} using transformer {}", e.getName(), trans.getClass().getName(), exception);
                         }
                     }
                 }
