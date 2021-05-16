@@ -62,24 +62,21 @@ import groovy.lang.Closure;
 import net.minecraftforge.gradle.patcher.PatcherExtension;
 import net.minecraftforge.gradle.util.json.version.OS;
 
-public class Constants
-{
+public class Constants {
     // OS
-    public static enum SystemArch
-    {
+    public static enum SystemArch {
         BIT_32, BIT_64;
 
-        public String toString()
-        {
+        public String toString() {
             return lower(name()).replace("bit_", "");
         }
     }
 
-    public static final OS         OPERATING_SYSTEM = OS.CURRENT;
-    public static final SystemArch SYSTEM_ARCH      = getArch();
-    public static final Charset    CHARSET          = Charsets.UTF_8;
-    public static final String     HASH_FUNC        = "MD5";
-    public static final String     USER_AGENT       = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11";
+    public static final OS OPERATING_SYSTEM = OS.CURRENT;
+    public static final SystemArch SYSTEM_ARCH = getArch();
+    public static final Charset CHARSET = Charsets.UTF_8;
+    public static final String HASH_FUNC = "MD5";
+    public static final String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11";
 
     // extension names
     public static final String EXT_NAME_MC = "minecraft";
@@ -88,134 +85,147 @@ public class Constants
 
     @SuppressWarnings("serial")
     public static final Closure<Boolean> CALL_FALSE = new Closure<Boolean>(Constants.class) {
-        public Boolean call(Object o)
-        {
+        public Boolean call(Object o) {
             return false;
         }
     };
 
     // replacement strings
 
-    /** MC version in form "#.#.#(-appendage)" where the appendage may be -pre# or something. **/
-    public static final String REPLACE_MC_VERSION        = "{MC_VERSION}";
-    /** the folder where to cache. ~/.gradle/caches/minecraft **/
-    public static final String REPLACE_CACHE_DIR         = "{CACHE_DIR}";
-    /** the folder where to cache project specific. project/.gradle/ **/
+    /**
+     * MC version in form "#.#.#(-appendage)" where the appendage may be -pre# or something.
+     **/
+    public static final String REPLACE_MC_VERSION = "{MC_VERSION}";
+    /**
+     * the folder where to cache. ~/.gradle/caches/minecraft
+     **/
+    public static final String REPLACE_CACHE_DIR = "{CACHE_DIR}";
+    /**
+     * the folder where to cache project specific. project/.gradle/
+     **/
     public static final String REPLACE_PROJECT_CACHE_DIR = "{PROJECT_CACHE_DIR}";
-    /** project/build **/
-    public static final String REPLACE_BUILD_DIR         = "{BUILD_DIR}";
-    /** MCP mapping channel **/
-    public static final String REPLACE_MCP_CHANNEL       = "{MAPPING_CHANNEL}";
-    /** MCP mapping version **/
-    public static final String REPLACE_MCP_VERSION       = "{MAPPING_VERSION}";
-    /** MCP mapping MC version **/
-    public static final String REPLACE_MCP_MCVERSION     = "{MAPPING_MCVERSION}";
-    /** AssetIndex name **/
-    public static final String REPLACE_ASSET_INDEX       = "{ASSET_INDEX}";
+    /**
+     * project/build
+     **/
+    public static final String REPLACE_BUILD_DIR = "{BUILD_DIR}";
+    /**
+     * MCP mapping channel
+     **/
+    public static final String REPLACE_MCP_CHANNEL = "{MAPPING_CHANNEL}";
+    /**
+     * MCP mapping version
+     **/
+    public static final String REPLACE_MCP_VERSION = "{MAPPING_VERSION}";
+    /**
+     * MCP mapping MC version
+     **/
+    public static final String REPLACE_MCP_MCVERSION = "{MAPPING_MCVERSION}";
+    /**
+     * AssetIndex name
+     **/
+    public static final String REPLACE_ASSET_INDEX = "{ASSET_INDEX}";
 
 
     // urls
-    public static final String URL_MC_MANIFEST  = "https://launchermeta.mojang.com/mc/game/version_manifest.json";
-    public static final String URL_FF           = "http://files.minecraftforge.net/fernflower-fix-1.0.zip";
-    public static final String URL_ASSETS       = "http://resources.download.minecraft.net";
-    public static final String URL_LIBRARY      = "https://libraries.minecraft.net/";
-    public static final String URL_FORGE_MAVEN  = "https://maven.minecraftforge.net/";
-    public static final String URL_MCP_JSON     = "http://export.mcpbot.bspk.rs/versions.json";
+    public static final String URL_MC_MANIFEST = "https://launchermeta.mojang.com/mc/game/version_manifest.json";
+    public static final String URL_FF = "http://files.minecraftforge.net/fernflower-fix-1.0.zip";
+    public static final String URL_ASSETS = "http://resources.download.minecraft.net";
+    public static final String URL_LIBRARY = "https://libraries.minecraft.net/";
+    public static final String URL_FORGE_MAVEN = "https://maven.minecraftforge.net/";
+    public static final String URL_MCP_JSON = "http://export.mcpbot.bspk.rs/versions.json";
 
     // configs
-    public static final String CONFIG_MCP_DATA       = "forgeGradleMcpData";
-    public static final String CONFIG_MAPPINGS       = "forgeGradleMcpMappings";
-    public static final String CONFIG_NATIVES        = "forgeGradleMcNatives";
-    public static final String CONFIG_MC_DEPS        = "forgeGradleMcDeps";
+    public static final String CONFIG_MCP_DATA = "forgeGradleMcpData";
+    public static final String CONFIG_MAPPINGS = "forgeGradleMcpMappings";
+    public static final String CONFIG_NATIVES = "forgeGradleMcNatives";
+    public static final String CONFIG_MC_DEPS = "forgeGradleMcDeps";
     public static final String CONFIG_MC_DEPS_CLIENT = "forgeGradleMcDepsClient";
 
     // things in the cache dir.
-    public static final String DIR_LOCAL_CACHE  = REPLACE_PROJECT_CACHE_DIR + "/minecraft";
-    public static final String DIR_MCP_DATA     = REPLACE_CACHE_DIR + "/de/oceanlabs/mcp/mcp/" + REPLACE_MC_VERSION;
+    public static final String DIR_LOCAL_CACHE = REPLACE_PROJECT_CACHE_DIR + "/minecraft";
+    public static final String DIR_MCP_DATA = REPLACE_CACHE_DIR + "/de/oceanlabs/mcp/mcp/" + REPLACE_MC_VERSION;
     public static final String DIR_MCP_MAPPINGS = REPLACE_CACHE_DIR + "/de/oceanlabs/mcp/mcp_" + REPLACE_MCP_CHANNEL + "/" + REPLACE_MCP_VERSION;
     public static final String JAR_CLIENT_FRESH = REPLACE_CACHE_DIR + "/net/minecraft/minecraft/" + REPLACE_MC_VERSION + "/minecraft-" + REPLACE_MC_VERSION + ".jar";
     public static final String JAR_SERVER_FRESH = REPLACE_CACHE_DIR + "/net/minecraft/minecraft_server/" + REPLACE_MC_VERSION + "/minecraft_server-" + REPLACE_MC_VERSION + ".jar";
-    public static final String JAR_MERGED       = REPLACE_CACHE_DIR + "/net/minecraft/minecraft_merged/" + REPLACE_MC_VERSION + "/minecraft_merged-" + REPLACE_MC_VERSION + ".jar";
-    public static final String JAR_SERVER_PURE  = REPLACE_CACHE_DIR + "/net/minecraft/minecraft_server/" + REPLACE_MC_VERSION + "/minecraft_server-" + REPLACE_MC_VERSION + "-pure.jar";
-    public static final String JAR_SERVER_DEPS  = REPLACE_CACHE_DIR + "/net/minecraft/minecraft_server/" + REPLACE_MC_VERSION + "/minecraft_server-" + REPLACE_MC_VERSION + "-deps.jar";
-    public static final String DIR_NATIVES      = REPLACE_CACHE_DIR + "/net/minecraft/natives/" + REPLACE_MC_VERSION + "/";
-    public static final String JAR_FERNFLOWER   = REPLACE_CACHE_DIR + "/fernflower-fixed.jar";
-    public static final String DIR_ASSETS       = REPLACE_CACHE_DIR + "/assets";
+    public static final String JAR_MERGED = REPLACE_CACHE_DIR + "/net/minecraft/minecraft_merged/" + REPLACE_MC_VERSION + "/minecraft_merged-" + REPLACE_MC_VERSION + ".jar";
+    public static final String JAR_SERVER_PURE = REPLACE_CACHE_DIR + "/net/minecraft/minecraft_server/" + REPLACE_MC_VERSION + "/minecraft_server-" + REPLACE_MC_VERSION + "-pure.jar";
+    public static final String JAR_SERVER_DEPS = REPLACE_CACHE_DIR + "/net/minecraft/minecraft_server/" + REPLACE_MC_VERSION + "/minecraft_server-" + REPLACE_MC_VERSION + "-deps.jar";
+    public static final String DIR_NATIVES = REPLACE_CACHE_DIR + "/net/minecraft/natives/" + REPLACE_MC_VERSION + "/";
+    public static final String JAR_FERNFLOWER = REPLACE_CACHE_DIR + "/fernflower-fixed.jar";
+    public static final String DIR_ASSETS = REPLACE_CACHE_DIR + "/assets";
     public static final String JSON_ASSET_INDEX = DIR_ASSETS + "/indexes/" + REPLACE_ASSET_INDEX + ".json";
-    public static final String DIR_JSONS        = REPLACE_CACHE_DIR + "/versionJsons";
-    public static final String JSON_VERSION     = DIR_JSONS + "/" + REPLACE_MC_VERSION + ".json";
+    public static final String DIR_JSONS = REPLACE_CACHE_DIR + "/versionJsons";
+    public static final String JSON_VERSION = DIR_JSONS + "/" + REPLACE_MC_VERSION + ".json";
 
     public static final String GRADLE_START_CLIENT = "GradleStart";
     public static final String GRADLE_START_SERVER = "GradleStartServer";
 
-    public static final String[] GRADLE_START_RESOURCES = new String[] {
-            "GradleStart.java",
-            "GradleStartServer.java",
-            "net/minecraftforge/gradle/GradleStartCommon.java"
+    public static final String[] GRADLE_START_RESOURCES = new String[]{
+        "GradleStart.java",
+        "GradleStartServer.java",
+        "net/minecraftforge/gradle/GradleStartCommon.java"
 
-            // 1.7.10 only
-            //makeStart.addResource("net/minecraftforge/gradle/OldPropertyMapSerializer.java");
+        // 1.7.10 only
+        //makeStart.addResource("net/minecraftforge/gradle/OldPropertyMapSerializer.java");
     };
 
-    public static final String[] GRADLE_START_FML_RES = new String[] {
-            "net/minecraftforge/gradle/GradleForgeHacks.java",
-            "net/minecraftforge/gradle/tweakers/CoremodTweaker.java",
-            "net/minecraftforge/gradle/tweakers/AccessTransformerTweaker.java"
+    public static final String[] GRADLE_START_FML_RES = new String[]{
+        "net/minecraftforge/gradle/GradleForgeHacks.java",
+        "net/minecraftforge/gradle/tweakers/CoremodTweaker.java",
+        "net/minecraftforge/gradle/tweakers/AccessTransformerTweaker.java",
+        "net/minecraftforge/gradle/GrossClassloaderHacks.java"
     };
 
     // mcp data constants
-    public static final String MCP_DATA_SRG       = DIR_MCP_DATA + "/joined.srg";
-    public static final String MCP_DATA_EXC       = DIR_MCP_DATA + "/joined.exc";
-    public static final String MCP_DATA_EXC_JSON  = DIR_MCP_DATA + "/exceptor.json";
-    public static final String MCP_DATA_STYLE     = DIR_MCP_DATA + "/astyle.cfg";
+    public static final String MCP_DATA_SRG = DIR_MCP_DATA + "/joined.srg";
+    public static final String MCP_DATA_EXC = DIR_MCP_DATA + "/joined.exc";
+    public static final String MCP_DATA_EXC_JSON = DIR_MCP_DATA + "/exceptor.json";
+    public static final String MCP_DATA_STYLE = DIR_MCP_DATA + "/astyle.cfg";
     public static final String MCP_PATCHES_CLIENT = DIR_MCP_DATA + "/patches/minecraft_ff";
     public static final String MCP_PATCHES_SERVER = DIR_MCP_DATA + "/patches/minecraft_server_ff";
     public static final String MCP_PATCHES_MERGED = DIR_MCP_DATA + "/patches/minecraft_merged_ff";
 
     // generated off of MCP data constants
-    public static final String CSV_METHOD       = DIR_MCP_MAPPINGS + "/methods.csv";
-    public static final String CSV_FIELD        = DIR_MCP_MAPPINGS + "/fields.csv";
-    public static final String CSV_PARAM        = DIR_MCP_MAPPINGS + "/params.csv";
+    public static final String CSV_METHOD = DIR_MCP_MAPPINGS + "/methods.csv";
+    public static final String CSV_FIELD = DIR_MCP_MAPPINGS + "/fields.csv";
+    public static final String CSV_PARAM = DIR_MCP_MAPPINGS + "/params.csv";
     public static final String SRG_NOTCH_TO_SRG = DIR_MCP_MAPPINGS + "/srgs/notch-srg.srg";
     public static final String SRG_NOTCH_TO_MCP = DIR_MCP_MAPPINGS + "/srgs/notch-mcp.srg";
-    public static final String SRG_SRG_TO_MCP   = DIR_MCP_MAPPINGS + "/srgs/srg-mcp.srg";
-    public static final String SRG_MCP_TO_SRG   = DIR_MCP_MAPPINGS + "/srgs/mcp-srg.srg";
+    public static final String SRG_SRG_TO_MCP = DIR_MCP_MAPPINGS + "/srgs/srg-mcp.srg";
+    public static final String SRG_MCP_TO_SRG = DIR_MCP_MAPPINGS + "/srgs/mcp-srg.srg";
     public static final String SRG_MCP_TO_NOTCH = DIR_MCP_MAPPINGS + "/srgs/mcp-notch.srg";
-    public static final String EXC_SRG          = DIR_MCP_MAPPINGS + "/srgs/srg.exc";
-    public static final String EXC_MCP          = DIR_MCP_MAPPINGS + "/srgs/mcp.exc";
+    public static final String EXC_SRG = DIR_MCP_MAPPINGS + "/srgs/srg.exc";
+    public static final String EXC_MCP = DIR_MCP_MAPPINGS + "/srgs/mcp.exc";
 
     // task names
-    public static final String TASK_DL_CLIENT        = "downloadClient";
-    public static final String TASK_DL_SERVER        = "downloadServer";
-    public static final String TASK_SPLIT_SERVER     = "splitServerJar";
-    public static final String TASK_MERGE_JARS       = "mergeJars";
-    public static final String TASK_EXTRACT_NATIVES  = "extractNatives";
-    public static final String TASK_DL_VERSION_JSON  = "getVersionJson";
-    public static final String TASK_DL_ASSET_INDEX   = "getAssetIndex";
-    public static final String TASK_DL_ASSETS        = "getAssets";
-    public static final String TASK_EXTRACT_MCP      = "extractMcpData";
+    public static final String TASK_DL_CLIENT = "downloadClient";
+    public static final String TASK_DL_SERVER = "downloadServer";
+    public static final String TASK_SPLIT_SERVER = "splitServerJar";
+    public static final String TASK_MERGE_JARS = "mergeJars";
+    public static final String TASK_EXTRACT_NATIVES = "extractNatives";
+    public static final String TASK_DL_VERSION_JSON = "getVersionJson";
+    public static final String TASK_DL_ASSET_INDEX = "getAssetIndex";
+    public static final String TASK_DL_ASSETS = "getAssets";
+    public static final String TASK_EXTRACT_MCP = "extractMcpData";
     public static final String TASK_EXTRACT_MAPPINGS = "extractMcpMappings";
-    public static final String TASK_GENERATE_SRGS    = "genSrgs";
-    public static final String TASK_CLEAN_CACHE      = "cleanCache";
+    public static final String TASK_GENERATE_SRGS = "genSrgs";
+    public static final String TASK_CLEAN_CACHE = "cleanCache";
 
     // util
     public static final String NEWLINE = System.getProperty("line.separator");
 
     // helper methods
-    public static List<String> getClassPath()
-    {
+    public static List<String> getClassPath() {
         URL[] urls = ((URLClassLoader) PatcherExtension.class.getClassLoader()).getURLs();
 
         ArrayList<String> list = new ArrayList<String>();
-        for (URL url : urls)
-        {
+        for (URL url : urls) {
             list.add(url.getPath());
         }
         return list;
     }
 
-    public static URL[] toUrls(FileCollection collection) throws MalformedURLException
-    {
+    public static URL[] toUrls(FileCollection collection) throws MalformedURLException {
         ArrayList<URL> urls = new ArrayList<URL>();
 
         for (File file : collection.getFiles())
@@ -224,51 +234,40 @@ public class Constants
         return urls.toArray(new URL[urls.size()]);
     }
 
-    public static File getMinecraftDirectory()
-    {
+    public static File getMinecraftDirectory() {
         String userDir = System.getProperty("user.home");
 
-        switch (OPERATING_SYSTEM)
-            {
-                case LINUX:
-                    return new File(userDir, ".minecraft");
-                case WINDOWS:
-                    String appData = System.getenv("APPDATA");
-                    String folder = appData != null ? appData : userDir;
-                    return new File(folder, ".minecraft");
-                case OSX:
-                    return new File(userDir, "Library/Application Support/minecraft");
-                default:
-                    return new File(userDir, "minecraft");
-            }
+        switch (OPERATING_SYSTEM) {
+            case LINUX:
+                return new File(userDir, ".minecraft");
+            case WINDOWS:
+                String appData = System.getenv("APPDATA");
+                String folder = appData != null ? appData : userDir;
+                return new File(folder, ".minecraft");
+            case OSX:
+                return new File(userDir, "Library/Application Support/minecraft");
+            default:
+                return new File(userDir, "minecraft");
+        }
     }
 
-    private static SystemArch getArch()
-    {
+    private static SystemArch getArch() {
         String name = lower(System.getProperty("os.arch"));
-        if (name.contains("64"))
-        {
+        if (name.contains("64")) {
             return SystemArch.BIT_64;
-        }
-        else
-        {
+        } else {
             return SystemArch.BIT_32;
         }
     }
 
-    public static String lower(String string)
-    {
+    public static String lower(String string) {
         return string.toLowerCase(Locale.ENGLISH);
     }
 
-    public static List<String> lines(final String text)
-    {
-        try
-        {
+    public static List<String> lines(final String text) {
+        try {
             return ImmutableList.copyOf(CharStreams.readLines(new StringReader(text)));
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             // IMPOSSIBRU
             return ImmutableList.of();
         }
@@ -276,24 +275,22 @@ public class Constants
 
     /**
      * This method constructs,, configures and returns a CSV reader instance to be used to read MCP CSV files.
+     *
      * @param file File to read
      * @return a configured CSVReader
      * @throws IOException Propogated from openning the file
      */
-    public static CSVReader getReader(File file) throws IOException
-    {
+    public static CSVReader getReader(File file) throws IOException {
         return new CSVReader(Files.newReader(file, Charset.defaultCharset()), CSVParser.DEFAULT_SEPARATOR, CSVParser.DEFAULT_QUOTE_CHARACTER, CSVParser.NULL_CHARACTER, 1, false);
     }
 
-    public static Element addXml(Node parent, String name, Map<String, String> values)
-    {
+    public static Element addXml(Node parent, String name, Map<String, String> values) {
         Document doc = parent.getOwnerDocument();
         if (doc == null)
             doc = (Document) parent;
 
         Element e = doc.createElement(name);
-        for (Entry<String, String> entry : values.entrySet())
-        {
+        for (Entry<String, String> entry : values.entrySet()) {
             e.setAttribute(entry.getKey(), entry.getValue());
         }
         parent.appendChild(e);
@@ -303,12 +300,12 @@ public class Constants
     /**
      * This method uses the channels API which uses direct filesystem copies instead of loading it into
      * ram and then outputting it.
-     * @param in file to copy
+     *
+     * @param in  file to copy
      * @param out created with directories if needed
      * @throws IOException In case anything goes wrong with the file IO
      */
-    public static void copyFile(File in, File out) throws IOException
-    {
+    public static void copyFile(File in, File out) throws IOException {
         // make dirs just in case
         out.getParentFile().mkdirs();
 
@@ -328,13 +325,13 @@ public class Constants
     /**
      * This method uses the channels API which uses direct filesystem copies instead of loading it into
      * ram and then outputting it.
-     * @param in file to copy
-     * @param out created with directories if needed
+     *
+     * @param in   file to copy
+     * @param out  created with directories if needed
      * @param size If you have it earlier
      * @throws IOException In case anything goes wrong with the file IO
      */
-    public static void copyFile(File in, File out, long size) throws IOException
-    {
+    public static void copyFile(File in, File out, long size) throws IOException {
         // make dirs just in case
         out.getParentFile().mkdirs();
 
@@ -350,57 +347,46 @@ public class Constants
         fout.close();
     }
 
-    public static String hash(File file)
-    {
+    public static String hash(File file) {
         if (file.getPath().endsWith(".zip") || file.getPath().endsWith(".jar"))
             return hashZip(file, HASH_FUNC);
         else
             return hash(file, HASH_FUNC);
     }
 
-    public static List<String> hashAll(File file)
-    {
+    public static List<String> hashAll(File file) {
         LinkedList<String> list = new LinkedList<String>();
 
-        if (file.isDirectory())
-        {
+        if (file.isDirectory()) {
             for (File f : file.listFiles())
                 list.addAll(hashAll(f));
-        }
-        else if (!file.getName().equals(".cache"))
+        } else if (!file.getName().equals(".cache"))
             list.add(hash(file));
 
         return list;
     }
 
-    public static String hash(File file, String function)
-    {
-        try
-        {
+    public static String hash(File file, String function) {
+        try {
             InputStream fis = new FileInputStream(file);
             byte[] array = ByteStreams.toByteArray(fis);
             fis.close();
 
             return hash(array, function);
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
         return null;
     }
 
-    public static String hashZip(File file, String function)
-    {
-        try
-        {
+    public static String hashZip(File file, String function) {
+        try {
             MessageDigest hasher = MessageDigest.getInstance(function);
 
             ZipInputStream zin = new ZipInputStream(new FileInputStream(file));
             ZipEntry entry = null;
-            while ((entry = zin.getNextEntry()) != null)
-            {
+            while ((entry = zin.getNextEntry()) != null) {
                 hasher.update(entry.getName().getBytes());
                 hasher.update(ByteStreams.toByteArray(zin));
             }
@@ -411,75 +397,62 @@ public class Constants
             // convert to string
             String result = "";
 
-            for (int i = 0; i < hash.length; i++)
-            {
+            for (int i = 0; i < hash.length; i++) {
                 result += Integer.toString((hash[i] & 0xff) + 0x100, 16).substring(1);
             }
             return result;
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
         return null;
     }
 
-    public static String hash(String str)
-    {
+    public static String hash(String str) {
         return hash(str.getBytes());
     }
 
-    public static String hash(byte[] bytes)
-    {
+    public static String hash(byte[] bytes) {
         return hash(bytes, HASH_FUNC);
     }
 
-    public static String hash(byte[] bytes, String function)
-    {
-        try
-        {
+    public static String hash(byte[] bytes, String function) {
+        try {
             MessageDigest complete = MessageDigest.getInstance(function);
             byte[] hash = complete.digest(bytes);
 
             String result = "";
 
-            for (int i = 0; i < hash.length; i++)
-            {
+            for (int i = 0; i < hash.length; i++) {
                 result += Integer.toString((hash[i] & 0xff) + 0x100, 16).substring(1);
             }
             return result;
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
         return null;
     }
 
-    public static PrintStream getTaskLogStream(Project project, String name)
-    {
+    public static PrintStream getTaskLogStream(Project project, String name) {
         final File taskLogs = new File(project.getBuildDir(), "taskLogs");
         taskLogs.mkdirs();
         final File logFile = new File(taskLogs, name);
         logFile.delete();//Delete the old log
-        try
-        {
+        try {
             return new PrintStream(logFile);
+        } catch (FileNotFoundException ignored) {
         }
-        catch (FileNotFoundException ignored)
-        {}
         return null;// Should never get to here
     }
 
     /**
      * Throws a null runtime exception if the resource isnt found.
+     *
      * @param resource String name of the resource your looking for
      * @return URL
      */
-    public static URL getResource(String resource)
-    {
+    public static URL getResource(String resource) {
         ClassLoader loader = BaseExtension.class.getClassLoader();
 
         if (loader == null)
@@ -500,12 +473,12 @@ public class Constants
      * Arrays use Arrays.toString().
      * File objects return their absolute paths.
      * All other objects have their toString run.
+     *
      * @param obj Object to resolve
      * @return resolved string
      */
     @SuppressWarnings("rawtypes")
-    public static String resolveString(Object obj)
-    {
+    public static String resolveString(Object obj) {
         if (obj == null)
             return null;
 
@@ -515,23 +488,17 @@ public class Constants
 
         if (obj instanceof Closure)
             return resolveString(((Closure) obj).call());// yes recursive.
-        if (obj instanceof Callable)
-        {
-            try
-            {
+        if (obj instanceof Callable) {
+            try {
                 return resolveString(((Callable) obj).call());
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 return null;
             }
-        }
-        else if (obj instanceof File)
+        } else if (obj instanceof File)
             return ((File) obj).getAbsolutePath();
 
-        // arrays
-        else if (obj.getClass().isArray())
-        {
+            // arrays
+        else if (obj.getClass().isArray()) {
             if (obj instanceof Object[])
                 return Arrays.toString(((Object[]) obj));
             else if (obj instanceof byte[])
@@ -548,9 +515,7 @@ public class Constants
                 return Arrays.toString(((long[]) obj));
             else
                 return obj.getClass().getSimpleName();
-        }
-
-        else
+        } else
             return obj.toString();
     }
 }
