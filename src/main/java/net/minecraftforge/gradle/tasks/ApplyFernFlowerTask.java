@@ -25,10 +25,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 import java.util.regex.Matcher;
@@ -77,7 +75,7 @@ public class ApplyFernFlowerTask extends CachedTask {
         final File tempDir = this.getTemporaryDir();
         final File tempJar = new File(this.getTemporaryDir(), in.getName());
 
-        Map<String, Object> mapOptions = new HashMap<String, Object>();
+        Map<String, Object> mapOptions = new HashMap<>();
         mapOptions.put(IFernflowerPreferences.DECOMPILE_INNER, "1");
         mapOptions.put(IFernflowerPreferences.DECOMPILE_GENERIC_SIGNATURES, "1");
         mapOptions.put(IFernflowerPreferences.ASCII_STRING_CHARACTERS, "1");
@@ -95,7 +93,23 @@ public class ApplyFernFlowerTask extends CachedTask {
 
         decompiler.addSpace(in, true);
         for (File library : classpath) {
-            decompiler.addSpace(library, false);
+            boolean passed = true;
+            try (ZipFile file = new ZipFile(library)) {
+                Enumeration<? extends ZipEntry> entries = file.entries();
+
+                while (entries.hasMoreElements()) {
+                    ZipEntry entry = entries.nextElement();
+
+                    if (entry.getName().startsWith("META-INF/versions/9/")) {
+                        passed = false;
+                        break;
+                    }
+                }
+            }
+
+            if (passed) {
+                decompiler.addSpace(library, false);
+            }
         }
 
         decompiler.decompileContext();
@@ -134,22 +148,19 @@ public class ApplyFernFlowerTask extends CachedTask {
         }
     }
 
-    class ByteCodeProvider implements IBytecodeProvider {
+    static class ByteCodeProvider implements IBytecodeProvider {
         @Override
         public byte[] getBytecode(String externalPath, String internalPath) throws IOException {
             File file = new File(externalPath);
             if (internalPath == null) {
                 return InterpreterUtil.getBytes(file);
             } else {
-                ZipFile archive = new ZipFile(file);
-                try {
+                try (ZipFile archive = new ZipFile(file)) {
                     ZipEntry entry = archive.getEntry(internalPath);
                     if (entry == null) {
                         throw new IOException("Entry not found: " + internalPath);
                     }
                     return InterpreterUtil.getBytes(archive, entry);
-                } finally {
-                    archive.close();
                 }
             }
         }
@@ -226,13 +237,12 @@ public class ApplyFernFlowerTask extends CachedTask {
         public void copyEntry(String source, String path, String archiveName, String entryName) {
             String file = new File(getAbsolutePath(path), archiveName).getPath();
 
-            if (!checkEntry(entryName, file)) {
+            if (checkEntry(entryName, file)) {
                 return;
             }
 
             try {
-                ZipFile srcArchive = new ZipFile(new File(source));
-                try {
+                try (ZipFile srcArchive = new ZipFile(new File(source))) {
                     ZipEntry entry = srcArchive.getEntry(entryName);
                     if (entry != null) {
                         InputStream in = srcArchive.getInputStream(entry);
@@ -241,8 +251,6 @@ public class ApplyFernFlowerTask extends CachedTask {
                         InterpreterUtil.copyStream(in, out);
                         in.close();
                     }
-                } finally {
-                    srcArchive.close();
                 }
             } catch (IOException ex) {
                 String message = "Cannot copy entry " + entryName + " from " + source + " to " + file;
@@ -254,7 +262,7 @@ public class ApplyFernFlowerTask extends CachedTask {
         public void saveClassEntry(String path, String archiveName, String qualifiedName, String entryName, String content) {
             String file = new File(getAbsolutePath(path), archiveName).getPath();
 
-            if (!checkEntry(entryName, file)) {
+            if (checkEntry(entryName, file)) {
                 return;
             }
 
@@ -262,7 +270,7 @@ public class ApplyFernFlowerTask extends CachedTask {
                 ZipOutputStream out = mapArchiveStreams.get(file);
                 out.putNextEntry(new ZipEntry(entryName));
                 if (content != null) {
-                    out.write(content.getBytes("UTF-8"));
+                    out.write(content.getBytes(StandardCharsets.UTF_8));
                 }
             } catch (IOException ex) {
                 String message = "Cannot write entry " + entryName + " to " + file;
@@ -271,17 +279,14 @@ public class ApplyFernFlowerTask extends CachedTask {
         }
 
         private boolean checkEntry(String entryName, String file) {
-            Set<String> set = mapArchiveEntries.get(file);
-            if (set == null) {
-                mapArchiveEntries.put(file, set = new HashSet<String>());
-            }
+            Set<String> set = mapArchiveEntries.computeIfAbsent(file, k -> new HashSet<>());
 
             boolean added = set.add(entryName);
             if (!added) {
                 String message = "Zip entry " + entryName + " already exists in " + file;
                 DecompilerContext.getLogger().writeMessage(message, IFernflowerLogger.Severity.WARN);
             }
-            return added;
+            return !added;
         }
 
         @Override
