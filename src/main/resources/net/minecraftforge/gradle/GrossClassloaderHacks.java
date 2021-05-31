@@ -25,7 +25,13 @@ public class GrossClassloaderHacks {
                 Unsafe unsafe = (Unsafe) field.get(null);
 
                 // jdk.internal.loader.ClassLoaders.AppClassLoader.ucp
-                Field ucpField = classLoader.getClass().getDeclaredField("ucp");
+                Field ucpField = null;
+                try {
+                    ucpField = classLoader.getClass().getDeclaredField("ucp");
+                } catch (NoSuchFieldException | SecurityException e) {
+                    ucpField = classLoader.getClass().getSuperclass().getDeclaredField("ucp");
+                }
+
                 long ucpFieldOffset = unsafe.objectFieldOffset(ucpField);
                 Object ucpObject = unsafe.getObject(classLoader, ucpFieldOffset);
 
