@@ -149,17 +149,18 @@ public class SplitJarTask extends CachedTask implements PatternFilterable {
     }
 
     @Override
-    @SuppressWarnings("rawtypes")
     public PatternFilterable exclude(Closure arg0) {
         return pattern.exclude(arg0);
     }
 
     @Override
+    @Input
     public Set<String> getExcludes() {
         return pattern.getExcludes();
     }
 
     @Override
+    @Input
     public Set<String> getIncludes() {
         return pattern.getIncludes();
     }
